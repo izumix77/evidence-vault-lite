@@ -1,0 +1,30 @@
+{
+  "name": "@ev-lite/core",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ev-lite/shared": "workspace:*",
+    "fast-glob": "^3.3.0",
+    "fs-extra": "^11.2.0",
+    "gray-matter": "^4.0.3",
+    "remark": "^15.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.0",
+    "typescript": "^5.5.0"
+  }
+}
