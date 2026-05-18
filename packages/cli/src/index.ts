@@ -5,6 +5,7 @@ import { runScan } from "./commands/scan.js";
 import { runPack } from "./commands/pack.js";
 import { runInitMeta } from "./commands/init-meta.js";
 import { runValidate } from "./commands/validate.js";
+import { runUi } from "./commands/ui.js";
 
 const program = new Command();
 
@@ -47,6 +48,15 @@ program
   .option("--strict", "exit 1 if any ERROR is found")
   .action(async (opts: { root?: string; strict?: boolean }) => {
     await runValidate({ root: opts.root, strict: opts.strict });
+  });
+
+program
+  .command("ui")
+  .description("Start the local web UI server")
+  .option("--root <path>", "root directory")
+  .option("--port <port>", "port number", (v: string) => Number.parseInt(v, 10))
+  .action(async (opts: { root?: string; port?: number }) => {
+    await runUi({ root: opts.root, port: opts.port });
   });
 
 program.parseAsync(process.argv).catch((err: unknown) => {

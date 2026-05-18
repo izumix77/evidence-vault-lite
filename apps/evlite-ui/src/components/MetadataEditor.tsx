@@ -1,0 +1,242 @@
+import { useEffect, useState } from "react";
+import { api } from "../api/client";
+import {
+  EVIDENCE_STATUSES,
+  type EvidenceStatus,
+  type MarkdownFilePayload,
+} from "../types";
+
+type FormState = {
+  ev_id: string;
+  stack: string;
+  status: EvidenceStatus | "";
+  tags: string;
+  depends_on: string;
+  related: string;
+  supersedes: string;
+};
+
+type SaveState = "idle" | "loading" | "saving" | "saved" | "error";
+
+function asStringArrayCsv(value: unknown): string {
+  if (!Array.isArray(value)) return "";
+  return value.filter((v): v is string => typeof v === "string").join(", ");
+}
+
+function getString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function getStatus(value: unknown): EvidenceStatus | "" {
+  if (
+    typeof value === "string" &&
+    (EVIDENCE_STATUSES as readonly string[]).includes(value)
+  ) {
+    return value as EvidenceStatus;
+  }
+  return "";
+}
+
+function frontmatterToForm(fm: Record<string, unknown>): FormState {
+  return {
+    ev_id: getString(fm.ev_id),
+    stack: getString(fm.stack),
+    status: getStatus(fm.status),
+    tags: asStringArrayCsv(fm.tags),
+    depends_on: asStringArrayCsv(fm.depends_on),
+    related: asStringArrayCsv(fm.related),
+    supersedes: asStringArrayCsv(fm.supersedes),
+  };
+}
+
+function parseCsv(value: string): string[] {
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function mergeFormIntoFrontmatter(
+  form: FormState,
+  original: Record<string, unknown>,
+): Record<string, unknown> {
+  const fm: Record<string, unknown> = { ...original };
+
+  const setOrDelete = (key: string, value: string) => {
+    if (value) fm[key] = value;
+    else delete fm[key];
+  };
+
+  setOrDelete("ev_id", form.ev_id);
+  setOrDelete("stack", form.stack);
+  setOrDelete("status", form.status);
+
+  fm.tags = parseCsv(form.tags);
+  fm.depends_on = parseCsv(form.depends_on);
+  fm.related = parseCsv(form.related);
+  fm.supersedes = parseCsv(form.supersedes);
+
+  return fm;
+}
+
+type Props = {
+  path: string | null;
+};
+
+export function MetadataEditor({ path }: Props) {
+  const [payload, setPayload] = useState<MarkdownFilePayload | null>(null);
+  const [form, setForm] = useState<FormState | null>(null);
+  const [state, setState] = useState<SaveState>("idle");
+  const [errorMsg, setErrorMsg] = useState<string>("");
+
+  useEffect(() => {
+    if (!path) {
+      setPayload(null);
+      setForm(null);
+      return;
+    }
+    let cancelled = false;
+    setState("loading");
+    api
+      .getFile(path)
+      .then((p) => {
+        if (cancelled) return;
+        setPayload(p);
+        setForm(frontmatterToForm(p.frontmatter));
+        setState("idle");
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setErrorMsg(err instanceof Error ? err.message : String(err));
+        setState("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [path]);
+
+  if (!path) {
+    return <div className="empty">Select a file to edit metadata</div>;
+  }
+  if (state === "loading" || !form || !payload) {
+    return <div className="empty">Loading...</div>;
+  }
+
+  const updateField = <K extends keyof FormState>(
+    key: K,
+    value: FormState[K],
+  ) => {
+    setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
+  };
+
+  async function handleSave() {
+    if (!path || !payload || !form) return;
+    setState("saving");
+    setErrorMsg("");
+    try {
+      const newFrontmatter = mergeFormIntoFrontmatter(form, payload.frontmatter);
+      await api.putFile(path, {
+        frontmatter: newFrontmatter,
+        body: payload.body,
+      });
+      setPayload({ ...payload, frontmatter: newFrontmatter });
+      setState("saved");
+      setTimeout(() => {
+        setState((current) => (current === "saved" ? "idle" : current));
+      }, 1500);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : String(err));
+      setState("error");
+    }
+  }
+
+  return (
+    <div className="metadata-editor">
+      <h2>{path}</h2>
+
+      <div className="form-row">
+        <label>ev_id</label>
+        <input
+          value={form.ev_id}
+          onChange={(e) => updateField("ev_id", e.target.value)}
+          placeholder="ev:stack.name"
+        />
+      </div>
+
+      <div className="form-row">
+        <label>stack</label>
+        <input
+          value={form.stack}
+          onChange={(e) => updateField("stack", e.target.value)}
+        />
+      </div>
+
+      <div className="form-row">
+        <label>status</label>
+        <select
+          value={form.status}
+          onChange={(e) =>
+            updateField("status", e.target.value as EvidenceStatus | "")
+          }
+        >
+          <option value="">—</option>
+          {EVIDENCE_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="form-row">
+        <label>tags</label>
+        <input
+          value={form.tags}
+          onChange={(e) => updateField("tags", e.target.value)}
+          placeholder="comma-separated"
+        />
+      </div>
+
+      <div className="form-row">
+        <label>depends_on</label>
+        <input
+          value={form.depends_on}
+          onChange={(e) => updateField("depends_on", e.target.value)}
+          placeholder="comma-separated ev_ids"
+        />
+      </div>
+
+      <div className="form-row">
+        <label>related</label>
+        <input
+          value={form.related}
+          onChange={(e) => updateField("related", e.target.value)}
+          placeholder="comma-separated ev_ids"
+        />
+      </div>
+
+      <div className="form-row">
+        <label>supersedes</label>
+        <input
+          value={form.supersedes}
+          onChange={(e) => updateField("supersedes", e.target.value)}
+          placeholder="comma-separated ev_ids"
+        />
+      </div>
+
+      <div className="form-actions">
+        <button
+          className="primary"
+          onClick={handleSave}
+          disabled={state === "saving"}
+        >
+          {state === "saving" ? "Saving..." : "Save Metadata"}
+        </button>
+        {state === "saved" && <span className="saved-msg">✔ Saved</span>}
+        {state === "error" && (
+          <span className="error-msg">{errorMsg || "Error"}</span>
+        )}
+      </div>
+    </div>
+  );
+}

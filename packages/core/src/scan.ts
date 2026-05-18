@@ -1,4 +1,6 @@
 import fg from "fast-glob";
+import { parseFile } from "./parse.js";
+import { buildRegistry, type Registry } from "./registry.js";
 
 const DEFAULT_IGNORE = [
   "**/node_modules/**",
@@ -15,4 +17,10 @@ export async function scanFiles(root: string): Promise<string[]> {
     dot: false,
   });
   return files.sort();
+}
+
+export async function scanRepo(root: string): Promise<Registry> {
+  const files = await scanFiles(root);
+  const nodes = await Promise.all(files.map((f) => parseFile(root, f)));
+  return buildRegistry(root, nodes);
 }

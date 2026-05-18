@@ -1,11 +1,8 @@
 {
-  "name": "@ev-lite/cli",
+  "name": "@ev-lite/server",
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "bin": {
-    "evlite": "./dist/index.js"
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -20,10 +17,8 @@
   },
   "dependencies": {
     "@ev-lite/core": "workspace:*",
-    "@ev-lite/server": "workspace:*",
-    "commander": "^12.1.0",
-    "open": "^10.1.0",
-    "picocolors": "^1.1.0"
+    "@hono/node-server": "^1.13.0",
+    "hono": "^4.6.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
