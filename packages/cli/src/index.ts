@@ -6,6 +6,11 @@ import { runPack } from "./commands/pack.js";
 import { runInitMeta } from "./commands/init-meta.js";
 import { runValidate } from "./commands/validate.js";
 import { runUi } from "./commands/ui.js";
+import { runSnapshot } from "./commands/snapshot.js";
+
+function collect(value: string, previous: string[]): string[] {
+  return [...previous, value];
+}
 
 const program = new Command();
 
@@ -58,6 +63,48 @@ program
   .action(async (opts: { root?: string; port?: number }) => {
     await runUi({ root: opts.root, port: opts.port });
   });
+
+program
+  .command("snapshot <path>")
+  .description("Generate a code snapshot .md from a directory")
+  .option("--output <path>", "output file path")
+  .option("--stack <stack>", "frontmatter stack value")
+  .option("--title <title>", "snapshot title")
+  .option(
+    "--include <glob>",
+    "include glob (repeatable; replaces defaults)",
+    collect,
+    [] as string[],
+  )
+  .option(
+    "--exclude <glob>",
+    "additional exclude glob (repeatable)",
+    collect,
+    [] as string[],
+  )
+  .option("--no-content", "tree only (omit file content)")
+  .action(
+    async (
+      inputPath: string,
+      opts: {
+        output?: string;
+        stack?: string;
+        title?: string;
+        include: string[];
+        exclude: string[];
+        content?: boolean;
+      },
+    ) => {
+      await runSnapshot(inputPath, {
+        output: opts.output,
+        stack: opts.stack,
+        title: opts.title,
+        include: opts.include,
+        exclude: opts.exclude,
+        noContent: opts.content === false,
+      });
+    },
+  );
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   const message = err instanceof Error ? err.message : String(err);

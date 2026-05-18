@@ -5,4 +5,5 @@ export * from "./pack.js";
 export * from "./paths.js";
 export * from "./files.js";
 export * from "./packs.js";
+export * from "./snapshot.js";
 export * from "@ev-lite/shared";

@@ -5,6 +5,9 @@ import {
   buildPack,
   loadRegistry,
   ContextPackSchema,
+  getPackConfigPath,
+  getPackOutputPath,
+  getRegistryPath,
 } from "@ev-lite/core";
 
 export type PackOptions = {
@@ -17,11 +20,9 @@ export async function runPack(
   options: PackOptions,
 ): Promise<void> {
   const root = process.cwd();
-  const configPath =
-    options.config ?? path.join(root, ".ev-lite", "packs", `${packId}.json`);
-  const outputPath =
-    options.output ?? path.join(root, ".ev-lite", "packs", `${packId}.md`);
-  const registryPath = path.join(root, ".ev-lite", "registry.json");
+  const configPath = options.config ?? getPackConfigPath(root, packId);
+  const outputPath = options.output ?? getPackOutputPath(root, packId);
+  const registryPath = getRegistryPath(root);
 
   const configRaw = await readFile(configPath, "utf8");
   const pack = ContextPackSchema.parse(JSON.parse(configRaw));

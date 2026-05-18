@@ -6,17 +6,23 @@ const DEFAULT_IGNORE = [
   "**/node_modules/**",
   "**/dist/**",
   "**/.git/**",
-  "**/.ev-lite/**",
+  "**/.ev-lite/packs/**",
+  "**/.ev-lite/registry.json",
 ];
 
 export async function scanFiles(root: string): Promise<string[]> {
-  const files = await fg("**/*.md", {
+  const visible = await fg("**/*.md", {
     cwd: root,
     ignore: DEFAULT_IGNORE,
     onlyFiles: true,
     dot: false,
   });
-  return files.sort();
+  const snapshots = await fg(".ev-lite/snapshots/**/*.md", {
+    cwd: root,
+    onlyFiles: true,
+    dot: true,
+  });
+  return [...new Set([...visible, ...snapshots])].sort();
 }
 
 export async function scanRepo(root: string): Promise<Registry> {
