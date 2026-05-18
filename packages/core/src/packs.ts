@@ -2,7 +2,12 @@ import path from "node:path";
 import fs from "fs-extra";
 import fg from "fast-glob";
 import { ContextPackSchema, type ContextPack } from "@ev-lite/shared";
-import { basenameToPackId, getPackConfigPath, getPacksDir } from "./paths.js";
+import {
+  basenameToPackId,
+  getPackConfigPath,
+  getPackOutputPath,
+  getPacksDir,
+} from "./paths.js";
 
 export async function listPackIds(root: string): Promise<string[]> {
   const dir = getPacksDir(root);
@@ -31,4 +36,12 @@ export async function writePackConfig(
   const filepath = getPackConfigPath(root, packId);
   await fs.ensureDir(path.dirname(filepath));
   await fs.writeJson(filepath, validated, { spaces: 2 });
+}
+
+export async function deletePackFiles(
+  root: string,
+  packId: string,
+): Promise<void> {
+  await fs.remove(getPackConfigPath(root, packId));
+  await fs.remove(getPackOutputPath(root, packId));
 }

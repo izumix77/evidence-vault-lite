@@ -5,7 +5,13 @@ import { EvIdListEditor } from "./EvIdListEditor";
 
 type ListKey = "doNotInfer" | "outputGoal";
 
-type PackState = "idle" | "loading" | "saving" | "building" | "error";
+type PackState =
+  | "idle"
+  | "loading"
+  | "saving"
+  | "building"
+  | "deleting"
+  | "error";
 
 const EMPTY_PACK: ContextPack = {
   id: "",
@@ -64,14 +70,34 @@ export function PackBuilder({ registry }: Props) {
   }
 
   async function handleSave() {
-    if (!pack.id) return;
+    const targetId = selectedId || pack.id;
+    if (!targetId) return;
     setState("saving");
     setErrorMsg("");
     try {
-      await api.putPack(pack.id, pack);
+      await api.putPack(targetId, pack);
       const ids = await api.getPacks();
       setPackIds(ids);
-      setSelectedId(pack.id);
+      setSelectedId(targetId);
+      setState("idle");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : String(err));
+      setState("error");
+    }
+  }
+
+  async function handleDelete() {
+    if (!selectedId) return;
+    if (!window.confirm(`Delete ${selectedId} ?`)) return;
+    setState("deleting");
+    setErrorMsg("");
+    try {
+      await api.deletePack(selectedId);
+      const ids = await api.getPacks();
+      setPackIds(ids);
+      setSelectedId("");
+      setPack(EMPTY_PACK);
+      setPreview("");
       setState("idle");
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : String(err));
@@ -112,6 +138,8 @@ export function PackBuilder({ registry }: Props) {
     }));
   }
 
+  const isExisting = selectedId !== "";
+
   return (
     <div className="pack-builder">
       <div className="pack-list">
@@ -127,6 +155,12 @@ export function PackBuilder({ registry }: Props) {
           ))}
         </select>
         <button onClick={newPack}>New</button>
+        <button
+          onClick={handleDelete}
+          disabled={!selectedId || state === "deleting"}
+        >
+          {state === "deleting" ? "Deleting..." : "Delete"}
+        </button>
       </div>
 
       <div className="form-row">
@@ -135,8 +169,13 @@ export function PackBuilder({ registry }: Props) {
           value={pack.id}
           onChange={(e) => setPack({ ...pack, id: e.target.value })}
           placeholder="pack:name"
+          readOnly={isExisting}
+          className={isExisting ? "field-readonly" : ""}
         />
       </div>
+      {isExisting && (
+        <div className="field-hint">id is immutable after creation</div>
+      )}
 
       <div className="form-row">
         <label>goal</label>
@@ -174,7 +213,7 @@ export function PackBuilder({ registry }: Props) {
         <button
           className="primary"
           onClick={handleSave}
-          disabled={!pack.id || state === "saving"}
+          disabled={(!selectedId && !pack.id) || state === "saving"}
         >
           {state === "saving" ? "Saving..." : "Save Pack"}
         </button>

@@ -5,6 +5,7 @@ import {
   listPackIds,
   readPackConfig,
   writePackConfig,
+  deletePackFiles,
   buildPack,
   loadRegistry,
   ContextPackSchema,
@@ -32,6 +33,12 @@ export function registerPacksRoutes(
     const body = await c.req.json();
     const pack = ContextPackSchema.parse(body);
     await writePackConfig(opts.root, id, pack);
+    return c.json({ ok: true });
+  });
+
+  app.delete("/api/packs/:id", async (c) => {
+    const id = c.req.param("id");
+    await deletePackFiles(opts.root, id);
     return c.json({ ok: true });
   });
 

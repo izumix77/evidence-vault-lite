@@ -54,6 +54,9 @@ export const api = {
       body: JSON.stringify(pack),
     }),
 
+  deletePack: (id: string) =>
+    request<void>(`/packs/${encodeURIComponent(id)}`, { method: "DELETE" }),
+
   buildPack: (id: string) =>
     request<string>(
       `/packs/${encodeURIComponent(id)}/build`,

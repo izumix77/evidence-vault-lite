@@ -207,6 +207,19 @@ body {
   border-color: #58a6ff;
 }
 
+.form-row input.field-readonly {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #161b22;
+}
+
+.field-hint {
+  margin: -4px 0 12px 112px;
+  font-size: 11px;
+  color: #6e7681;
+  font-style: italic;
+}
+
 /* ---------- Buttons ---------- */
 button {
   padding: 6px 14px;
