@@ -391,6 +391,19 @@ button.primary:hover {
   color: #e6edf3;
 }
 
+.preview-body {
+  position: relative;
+}
+
+.preview-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 10px;
+  font-size: 11px;
+  z-index: 1;
+}
+
 /* ---------- Banner ---------- */
 .banner-error {
   background: #2d1418;

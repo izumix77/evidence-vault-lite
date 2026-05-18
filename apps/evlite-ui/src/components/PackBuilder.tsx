@@ -32,6 +32,7 @@ export function PackBuilder({ registry }: Props) {
   const [preview, setPreview] = useState<string>("");
   const [state, setState] = useState<PackState>("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [copied, setCopied] = useState<boolean>(false);
 
   useEffect(() => {
     api
@@ -138,6 +139,16 @@ export function PackBuilder({ registry }: Props) {
     }));
   }
 
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(preview);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard unavailable (insecure context / permission denied)
+    }
+  }
+
   const isExisting = selectedId !== "";
 
   return (
@@ -231,7 +242,12 @@ export function PackBuilder({ registry }: Props) {
       {preview && (
         <div className="preview">
           <h3>Preview: pack.md</h3>
-          <pre>{preview}</pre>
+          <div className="preview-body">
+            <button className="preview-copy" onClick={handleCopy}>
+              {copied ? "Copied!" : "Copy"}
+            </button>
+            <pre>{preview}</pre>
+          </div>
         </div>
       )}
     </div>
