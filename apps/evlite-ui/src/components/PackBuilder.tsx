@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
-import type { ContextPack } from "../types";
+import type { ContextPack, Registry } from "../types";
+import { EvIdListEditor } from "./EvIdListEditor";
 
-type ListKey = "mustRead" | "doNotInfer" | "outputGoal";
+type ListKey = "doNotInfer" | "outputGoal";
 
 type PackState = "idle" | "loading" | "saving" | "building" | "error";
 
@@ -14,7 +15,11 @@ const EMPTY_PACK: ContextPack = {
   outputGoal: [],
 };
 
-export function PackBuilder() {
+type Props = {
+  registry: Registry;
+};
+
+export function PackBuilder({ registry }: Props) {
   const [packIds, setPackIds] = useState<string[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [pack, setPack] = useState<ContextPack>(EMPTY_PACK);
@@ -141,13 +146,12 @@ export function PackBuilder() {
         />
       </div>
 
-      <ListField
+      <EvIdListEditor
         label="mustRead"
-        items={pack.mustRead}
-        onAdd={() => addListItem("mustRead")}
-        onUpdate={(i, v) => updateListItem("mustRead", i, v)}
-        onRemove={(i) => removeListItem("mustRead", i)}
-        placeholder="ev:stack.name"
+        values={pack.mustRead}
+        onChange={(v) => setPack((prev) => ({ ...prev, mustRead: v }))}
+        registry={registry}
+        listIdPrefix="pack-mustRead"
       />
 
       <ListField

@@ -4,23 +4,29 @@ import {
   EVIDENCE_STATUSES,
   type EvidenceStatus,
   type MarkdownFilePayload,
+  type Registry,
 } from "../types";
+import { EvIdListEditor } from "./EvIdListEditor";
 
 type FormState = {
   ev_id: string;
   stack: string;
   status: EvidenceStatus | "";
   tags: string;
-  depends_on: string;
-  related: string;
-  supersedes: string;
+  depends_on: string[];
+  related: string[];
+  supersedes: string[];
 };
 
 type SaveState = "idle" | "loading" | "saving" | "saved" | "error";
 
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is string => typeof v === "string");
+}
+
 function asStringArrayCsv(value: unknown): string {
-  if (!Array.isArray(value)) return "";
-  return value.filter((v): v is string => typeof v === "string").join(", ");
+  return asStringArray(value).join(", ");
 }
 
 function getString(value: unknown): string {
@@ -43,9 +49,9 @@ function frontmatterToForm(fm: Record<string, unknown>): FormState {
     stack: getString(fm.stack),
     status: getStatus(fm.status),
     tags: asStringArrayCsv(fm.tags),
-    depends_on: asStringArrayCsv(fm.depends_on),
-    related: asStringArrayCsv(fm.related),
-    supersedes: asStringArrayCsv(fm.supersedes),
+    depends_on: asStringArray(fm.depends_on),
+    related: asStringArray(fm.related),
+    supersedes: asStringArray(fm.supersedes),
   };
 }
 
@@ -72,18 +78,19 @@ function mergeFormIntoFrontmatter(
   setOrDelete("status", form.status);
 
   fm.tags = parseCsv(form.tags);
-  fm.depends_on = parseCsv(form.depends_on);
-  fm.related = parseCsv(form.related);
-  fm.supersedes = parseCsv(form.supersedes);
+  fm.depends_on = form.depends_on.filter(Boolean);
+  fm.related = form.related.filter(Boolean);
+  fm.supersedes = form.supersedes.filter(Boolean);
 
   return fm;
 }
 
 type Props = {
   path: string | null;
+  registry: Registry;
 };
 
-export function MetadataEditor({ path }: Props) {
+export function MetadataEditor({ path, registry }: Props) {
   const [payload, setPayload] = useState<MarkdownFilePayload | null>(null);
   const [form, setForm] = useState<FormState | null>(null);
   const [state, setState] = useState<SaveState>("idle");
@@ -197,32 +204,29 @@ export function MetadataEditor({ path }: Props) {
         />
       </div>
 
-      <div className="form-row">
-        <label>depends_on</label>
-        <input
-          value={form.depends_on}
-          onChange={(e) => updateField("depends_on", e.target.value)}
-          placeholder="comma-separated ev_ids"
-        />
-      </div>
+      <EvIdListEditor
+        label="depends_on"
+        values={form.depends_on}
+        onChange={(v) => updateField("depends_on", v)}
+        registry={registry}
+        listIdPrefix="metadata-depends_on"
+      />
 
-      <div className="form-row">
-        <label>related</label>
-        <input
-          value={form.related}
-          onChange={(e) => updateField("related", e.target.value)}
-          placeholder="comma-separated ev_ids"
-        />
-      </div>
+      <EvIdListEditor
+        label="related"
+        values={form.related}
+        onChange={(v) => updateField("related", v)}
+        registry={registry}
+        listIdPrefix="metadata-related"
+      />
 
-      <div className="form-row">
-        <label>supersedes</label>
-        <input
-          value={form.supersedes}
-          onChange={(e) => updateField("supersedes", e.target.value)}
-          placeholder="comma-separated ev_ids"
-        />
-      </div>
+      <EvIdListEditor
+        label="supersedes"
+        values={form.supersedes}
+        onChange={(v) => updateField("supersedes", v)}
+        registry={registry}
+        listIdPrefix="metadata-supersedes"
+      />
 
       <div className="form-actions">
         <button

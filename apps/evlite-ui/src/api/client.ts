@@ -27,6 +27,8 @@ async function request<T>(
 export const api = {
   scan: () => request<Registry>("/scan", { method: "POST" }),
 
+  getRegistry: () => request<Registry>("/registry"),
+
   getFiles: () => request<EvidenceNode[]>("/files"),
 
   getFile: (path: string) =>

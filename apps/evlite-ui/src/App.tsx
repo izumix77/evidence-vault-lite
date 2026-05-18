@@ -3,22 +3,28 @@ import { api } from "./api/client";
 import { FileList } from "./components/FileList";
 import { MetadataEditor } from "./components/MetadataEditor";
 import { PackBuilder } from "./components/PackBuilder";
-import type { EvidenceNode } from "./types";
+import type { Registry } from "./types";
 import "./App.css";
 
 type Tab = "metadata" | "pack";
 
+const EMPTY_REGISTRY: Registry = {
+  generated_at: "",
+  root: "",
+  nodes: [],
+};
+
 export function App() {
-  const [files, setFiles] = useState<EvidenceNode[]>([]);
+  const [registry, setRegistry] = useState<Registry>(EMPTY_REGISTRY);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("metadata");
   const [scanning, setScanning] = useState(false);
   const [loadError, setLoadError] = useState<string>("");
 
-  async function loadFiles() {
+  async function loadRegistry() {
     try {
-      const f = await api.getFiles();
-      setFiles(f);
+      const r = await api.getRegistry();
+      setRegistry(r);
       setLoadError("");
     } catch (err: unknown) {
       setLoadError(err instanceof Error ? err.message : String(err));
@@ -26,14 +32,14 @@ export function App() {
   }
 
   useEffect(() => {
-    loadFiles();
+    loadRegistry();
   }, []);
 
   async function handleScan() {
     setScanning(true);
     try {
-      const registry = await api.scan();
-      setFiles(registry.nodes);
+      const r = await api.scan();
+      setRegistry(r);
       setLoadError("");
     } catch (err: unknown) {
       setLoadError(err instanceof Error ? err.message : String(err));
@@ -55,7 +61,7 @@ export function App() {
       <div className="app-body">
         <aside className="sidebar">
           <FileList
-            files={files}
+            files={registry.nodes}
             selectedPath={selectedPath}
             scanning={scanning}
             onSelect={handleSelect}
@@ -80,15 +86,17 @@ export function App() {
           <div className="tab-content">
             {loadError && (
               <div className="banner-error">
-                Failed to load files: {loadError}
+                Failed to load registry: {loadError}
                 {" "}
                 <span className="banner-hint">
                   (run <code>evlite scan</code> or click [Scan ▶])
                 </span>
               </div>
             )}
-            {tab === "metadata" && <MetadataEditor path={selectedPath} />}
-            {tab === "pack" && <PackBuilder />}
+            {tab === "metadata" && (
+              <MetadataEditor path={selectedPath} registry={registry} />
+            )}
+            {tab === "pack" && <PackBuilder registry={registry} />}
           </div>
         </main>
       </div>
