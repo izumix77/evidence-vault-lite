@@ -5,11 +5,13 @@ import {
   listPackIds,
   readPackConfig,
   type EvidenceStatus,
+  type EvidenceNode,
 } from "@ev-lite/core";
 
 export type ValidateOptions = {
   root?: string;
   strict?: boolean;
+  showChains?: boolean;
 };
 
 export async function runValidate(options: ValidateOptions): Promise<void> {
@@ -109,6 +111,54 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
         warn(
           `${pack.id} mustRead contains Superseded node\n      → ${evId}`,
         );
+      }
+    }
+  }
+
+  if (options.showChains) {
+    const nodeByEvId = new Map<string, EvidenceNode>();
+    for (const node of registry.nodes) {
+      if (node.ev_id) nodeByEvId.set(node.ev_id, node);
+    }
+
+    const chainRoots: string[] = [];
+    for (const node of registry.nodes) {
+      if (!node.ev_id) continue;
+      if (node.supersedes.length === 0) continue;
+      if (supersededBy.has(node.ev_id)) continue;
+      chainRoots.push(node.ev_id);
+    }
+    chainRoots.sort();
+
+    const printChain = (
+      evId: string,
+      depth: number,
+      visited: Set<string>,
+    ): void => {
+      if (visited.has(evId)) {
+        console.log(`${"  ".repeat(depth + 1)}→ supersedes ${evId} (cycle)`);
+        return;
+      }
+      visited.add(evId);
+      if (depth === 0) {
+        console.log(`  ${evId}`);
+      } else {
+        console.log(`${"  ".repeat(depth + 1)}→ supersedes ${evId}`);
+      }
+      const node = nodeByEvId.get(evId);
+      if (!node) return;
+      for (const target of node.supersedes) {
+        printChain(target, depth + 1, visited);
+      }
+    };
+
+    console.log("");
+    console.log("Supersedes chains:");
+    if (chainRoots.length === 0) {
+      console.log("  (none)");
+    } else {
+      for (const rootId of chainRoots) {
+        printChain(rootId, 0, new Set());
       }
     }
   }

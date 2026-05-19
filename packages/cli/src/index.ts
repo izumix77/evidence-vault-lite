@@ -51,9 +51,20 @@ program
   .description("Validate registry integrity")
   .option("--root <path>", "root directory")
   .option("--strict", "exit 1 if any ERROR is found")
-  .action(async (opts: { root?: string; strict?: boolean }) => {
-    await runValidate({ root: opts.root, strict: opts.strict });
-  });
+  .option("--show-chains", "print supersedes chains derived from topology")
+  .action(
+    async (opts: {
+      root?: string;
+      strict?: boolean;
+      showChains?: boolean;
+    }) => {
+      await runValidate({
+        root: opts.root,
+        strict: opts.strict,
+        showChains: opts.showChains,
+      });
+    },
+  );
 
 program
   .command("ui")
