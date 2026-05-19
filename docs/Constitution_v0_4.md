@@ -313,6 +313,37 @@ GET  /api/dirs?path=<path>      → サブディレクトリ一覧（Phase 4）
 - section index（`kind: "section"`）
 - append-only frontmatter history
 
+### Phase 4 — Topology Inspection CLI（優先実装順）
+
+Goal: `evlite validate` を lint から **topology inspection** に拡張する。
+Prompt Vault / Implementation Report / Snapshot を含む Dependency-aware Prompt Graph を可視化する。
+
+1. **`evlite validate --show-impact <ev_id>`**（最優先）
+   - 指定 node を参照している docs / packs / reports を逆引きする
+   - 「この仕様変更でどの AI 実装指示が腐るか」を即座に検出
+   ```
+   evlite validate --show-impact ev:flowmemo.ui-patterns
+
+   Impact:
+     Packs:
+       pack:impl-active-object-icon
+     Docs:
+       ev:flowmemo.focus-trail
+     Reports:
+       ev:flowmemo.report-active-object-icon
+   ```
+
+2. **`evlite validate --show-orphans`**
+   - どの pack / node からも参照されていない node を表示する
+   - 死んだドキュメントの検出
+
+3. **`evlite validate --show-depends`**
+   - `depends_on` / `related` / `supersedes` の構造を表示する
+   - `--show-chains`（実装済み）の depends_on 版
+
+4. **`evlite validate --show-cycles`**
+   - `depends_on` / `supersedes` の循環を検出・表示する
+
 ### Phase 5 — EvidenceVault 統合
 
 - DGC / TraceOS との接続
