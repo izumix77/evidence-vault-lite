@@ -101,7 +101,11 @@ export function App() {
               </div>
             )}
             {tab === "metadata" && (
-              <MetadataEditor path={selectedPath} registry={registry} />
+              <MetadataEditor
+                path={selectedPath}
+                registry={registry}
+                onScan={handleScan}
+              />
             )}
             {tab === "pack" && <PackBuilder registry={registry} />}
             {tab === "snapshot" && (

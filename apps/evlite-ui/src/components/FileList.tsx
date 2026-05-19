@@ -1,4 +1,5 @@
 import { useState, type MouseEvent } from "react";
+import { api } from "../api/client";
 import type { EvidenceNode } from "../types";
 
 type Props = {
@@ -48,6 +49,8 @@ export function FileList({
   const withMeta = files.filter((f) => f.ev_id !== null);
   const withoutMeta = files.filter((f) => f.ev_id === null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [addingAll, setAddingAll] = useState<boolean>(false);
+  const [addAllResult, setAddAllResult] = useState<string>("");
 
   function toggleGroup(groupId: string) {
     setCollapsed((prev) => {
@@ -56,6 +59,34 @@ export function FileList({
       else next.add(groupId);
       return next;
     });
+  }
+
+  async function handleAddAll() {
+    setAddingAll(true);
+    setAddAllResult("");
+    let inserted = 0;
+    let skipped = 0;
+    let failed = 0;
+    for (const f of withoutMeta) {
+      try {
+        await api.initMeta(f.path);
+        inserted++;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("409")) skipped++;
+        else failed++;
+      }
+    }
+    setAddingAll(false);
+    const parts = [`${inserted} files updated`];
+    if (skipped > 0) parts.push(`${skipped} skipped`);
+    if (failed > 0) parts.push(`${failed} failed`);
+    setAddAllResult(`✔ ${parts.join(", ")}`);
+    try {
+      await onScan();
+    } catch {
+      // scan failure doesn't roll back init-meta; user can retry [Scan ▶]
+    }
   }
 
   return (
@@ -68,6 +99,9 @@ export function FileList({
         >
           {scanning ? "Scanning..." : "Scan ▶"}
         </button>
+        {addAllResult && (
+          <div className="add-all-status">{addAllResult}</div>
+        )}
       </div>
       <div className="file-list-scroll">
         <FileSection
@@ -86,6 +120,8 @@ export function FileList({
           collapsed={collapsed}
           onToggle={toggleGroup}
           onSelect={onSelect}
+          onAddAll={handleAddAll}
+          addingAll={addingAll}
         />
       </div>
     </div>
@@ -100,6 +136,8 @@ type SectionProps = {
   onToggle: (groupId: string) => void;
   onSelect: (path: string) => void;
   showEvId?: boolean;
+  onAddAll?: () => void;
+  addingAll?: boolean;
 };
 
 function FileSection({
@@ -110,6 +148,8 @@ function FileSection({
   onToggle,
   onSelect,
   showEvId,
+  onAddAll,
+  addingAll,
 }: SectionProps) {
   if (files.length === 0) return null;
   const groups = buildGroups(files);
@@ -131,6 +171,20 @@ function FileSection({
       >
         <span className="file-list-section-name">{label}</span>
         <span className="file-list-section-count">({files.length})</span>
+        {onAddAll && (
+          <button
+            type="button"
+            className="add-all-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onAddAll();
+            }}
+            disabled={addingAll || files.length === 0}
+          >
+            {addingAll ? "Adding..." : "+ Add All"}
+          </button>
+        )}
       </summary>
       {groups.map((group) => {
         const groupId = `${label}::${group.key}`;

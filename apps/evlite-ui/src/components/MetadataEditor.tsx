@@ -88,9 +88,10 @@ function mergeFormIntoFrontmatter(
 type Props = {
   path: string | null;
   registry: Registry;
+  onScan: () => Promise<void> | void;
 };
 
-export function MetadataEditor({ path, registry }: Props) {
+export function MetadataEditor({ path, registry, onScan }: Props) {
   const [payload, setPayload] = useState<MarkdownFilePayload | null>(null);
   const [form, setForm] = useState<FormState | null>(null);
   const [state, setState] = useState<SaveState>("idle");
@@ -136,6 +137,27 @@ export function MetadataEditor({ path, registry }: Props) {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
+  async function handleAddMetadata() {
+    if (!path) return;
+    setState("saving");
+    setErrorMsg("");
+    try {
+      const newPayload = await api.initMeta(path);
+      setPayload(newPayload);
+      setForm(frontmatterToForm(newPayload.frontmatter));
+      setState("idle");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : String(err));
+      setState("error");
+      return;
+    }
+    try {
+      await onScan();
+    } catch {
+      // registry refresh failure doesn't roll back init-meta
+    }
+  }
+
   async function handleSave() {
     if (!path || !payload || !form) return;
     setState("saving");
@@ -157,9 +179,27 @@ export function MetadataEditor({ path, registry }: Props) {
     }
   }
 
+  const hasFrontmatter = Object.keys(payload.frontmatter).length > 0;
+
   return (
     <div className="metadata-editor">
       <h2>{path}</h2>
+
+      {!hasFrontmatter && (
+        <div className="add-metadata-banner">
+          <button
+            type="button"
+            className="primary"
+            onClick={handleAddMetadata}
+            disabled={state === "saving"}
+          >
+            {state === "saving" ? "Adding..." : "+ Add Metadata"}
+          </button>
+          <span className="add-metadata-hint">
+            This file has no frontmatter yet — start with a draft block.
+          </span>
+        </div>
+      )}
 
       <div className="form-row">
         <label>ev_id</label>

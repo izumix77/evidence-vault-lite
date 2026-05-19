@@ -45,6 +45,12 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  initMeta: (path: string) =>
+    request<MarkdownFilePayload>(
+      `/file/init-meta?path=${encodeURIComponent(path)}`,
+      { method: "POST" },
+    ),
+
   getPacks: () => request<string[]>("/packs"),
 
   getPack: (id: string) =>

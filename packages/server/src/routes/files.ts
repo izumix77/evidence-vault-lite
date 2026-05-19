@@ -4,6 +4,7 @@ import {
   loadRegistry,
   readMarkdownFile,
   writeMarkdownFile,
+  initMeta,
   getRegistryPath,
 } from "@ev-lite/core";
 
@@ -42,5 +43,22 @@ export function registerFilesRoutes(
     const body = await c.req.json<PutBody>();
     await writeMarkdownFile(opts.root, filePath, body.frontmatter, body.body);
     return c.json({ ok: true });
+  });
+
+  app.post("/api/file/init-meta", async (c) => {
+    const filePath = c.req.query("path");
+    if (!filePath) {
+      throw new HTTPException(400, {
+        message: "missing 'path' query parameter",
+      });
+    }
+    const result = await initMeta(opts.root, filePath);
+    if (result === "skipped") {
+      throw new HTTPException(409, {
+        message: "frontmatter already exists",
+      });
+    }
+    const payload = await readMarkdownFile(opts.root, filePath);
+    return c.json(payload);
   });
 }

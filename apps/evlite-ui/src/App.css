@@ -356,6 +356,45 @@ button.primary:hover {
   font-size: 12px;
 }
 
+/* ---------- File list: Add All ---------- */
+.add-all-button {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+}
+
+.add-all-button:hover:not(:disabled) {
+  background: #30363d;
+}
+
+.add-all-status {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #3fb950;
+}
+
+/* ---------- Add Metadata banner ---------- */
+.add-metadata-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  background: #0e1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+}
+
+.add-metadata-hint {
+  font-size: 12px;
+  color: #8b949e;
+}
+
 /* ---------- Metadata Editor ---------- */
 .metadata-editor h2 {
   font-size: 14px;
