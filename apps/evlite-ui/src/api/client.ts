@@ -3,6 +3,8 @@ import type {
   EvidenceNode,
   MarkdownFilePayload,
   Registry,
+  SnapshotInput,
+  SnapshotResult,
 } from "../types";
 
 const API_BASE = "/api";
@@ -56,6 +58,12 @@ export const api = {
 
   deletePack: (id: string) =>
     request<void>(`/packs/${encodeURIComponent(id)}`, { method: "DELETE" }),
+
+  generateSnapshot: (input: SnapshotInput) =>
+    request<SnapshotResult>("/snapshot", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
 
   buildPack: (id: string) =>
     request<string>(

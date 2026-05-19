@@ -1,0 +1,49 @@
+type Props = {
+  label: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+  placeholder?: string;
+};
+
+export function StringListEditor({
+  label,
+  values,
+  onChange,
+  placeholder,
+}: Props) {
+  function updateAt(index: number, value: string) {
+    const next = [...values];
+    next[index] = value;
+    onChange(next);
+  }
+
+  function addRow() {
+    onChange([...values, ""]);
+  }
+
+  function removeAt(index: number) {
+    onChange(values.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div className="list-field">
+      <div className="list-label">
+        <label>{label}</label>
+        <button onClick={addRow}>+</button>
+      </div>
+      {values.length === 0 && (
+        <div className="list-empty">— empty —</div>
+      )}
+      {values.map((value, i) => (
+        <div key={i} className="list-row">
+          <input
+            value={value}
+            onChange={(e) => updateAt(i, e.target.value)}
+            placeholder={placeholder}
+          />
+          <button onClick={() => removeAt(i)}>×</button>
+        </div>
+      ))}
+    </div>
+  );
+}

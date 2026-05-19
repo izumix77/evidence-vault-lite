@@ -99,6 +99,58 @@ body {
   border-left-color: #58a6ff;
 }
 
+/* ---------- File groups ---------- */
+.file-group {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.file-group-summary {
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #c9d1d9;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  list-style: none;
+  background: #0e1117;
+}
+
+.file-group-summary::-webkit-details-marker {
+  display: none;
+}
+
+.file-group-summary::before {
+  content: "▶";
+  font-size: 8px;
+  color: #6e7681;
+  width: 8px;
+  flex-shrink: 0;
+}
+
+.file-group[open] > .file-group-summary::before {
+  content: "▼";
+}
+
+.file-group-summary:hover {
+  background: #161b22;
+}
+
+.file-group-name {
+  color: #e6edf3;
+  letter-spacing: 0.02em;
+}
+
+.file-group-count {
+  color: #6e7681;
+}
+
+.file-group .file-item {
+  padding-left: 28px;
+}
+
 .file-item .ev-id {
   display: block;
   color: #58a6ff;
@@ -402,6 +454,63 @@ button.primary:hover {
   padding: 3px 10px;
   font-size: 11px;
   z-index: 1;
+}
+
+/* ---------- Snapshot Builder ---------- */
+.form-row .checkbox-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 6px;
+  flex: 1;
+  cursor: pointer;
+  font-size: 12px;
+  color: #e6edf3;
+}
+
+.form-row .checkbox-cell input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0;
+  background: revert;
+  border: revert;
+  margin: 0;
+  cursor: pointer;
+}
+
+.snapshot-result {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: #0e1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.snapshot-result-line {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 6px;
+  align-items: baseline;
+}
+
+.snapshot-result-line:last-child {
+  margin-bottom: 0;
+}
+
+.snapshot-result-label {
+  color: #8b949e;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  width: 50px;
+  flex-shrink: 0;
+}
+
+.snapshot-result code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #58a6ff;
+  background: transparent;
+  padding: 0;
+  word-break: break-all;
 }
 
 /* ---------- Banner ---------- */

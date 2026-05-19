@@ -50,3 +50,19 @@ export type MarkdownFilePayload = {
   frontmatter: Record<string, unknown>;
   body: string;
 };
+
+export type SnapshotInput = {
+  path: string;
+  stack?: string;
+  title?: string;
+  output?: string;
+  include?: string[];
+  exclude?: string[];
+  noContent?: boolean;
+};
+
+export type SnapshotResult = {
+  evId: string;
+  output: string;
+  fileCount: number;
+};

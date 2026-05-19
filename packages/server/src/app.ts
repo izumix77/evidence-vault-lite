@@ -8,6 +8,7 @@ import { registerRegistryRoutes } from "./routes/registry.js";
 import { registerFilesRoutes } from "./routes/files.js";
 import { registerPacksRoutes } from "./routes/packs.js";
 import { registerScanRoutes } from "./routes/scan.js";
+import { registerSnapshotRoutes } from "./routes/snapshot.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +29,7 @@ export function createApp(opts: AppOptions): Hono {
   registerFilesRoutes(app, opts);
   registerPacksRoutes(app, opts);
   registerScanRoutes(app, opts);
+  registerSnapshotRoutes(app, opts);
 
   app.use("/*", serveStatic({ root: UI_DIST_PATH }));
 

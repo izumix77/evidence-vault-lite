@@ -3,10 +3,11 @@ import { api } from "./api/client";
 import { FileList } from "./components/FileList";
 import { MetadataEditor } from "./components/MetadataEditor";
 import { PackBuilder } from "./components/PackBuilder";
+import { SnapshotBuilder } from "./components/SnapshotBuilder";
 import type { Registry } from "./types";
 import "./App.css";
 
-type Tab = "metadata" | "pack";
+type Tab = "metadata" | "pack" | "snapshot";
 
 const EMPTY_REGISTRY: Registry = {
   generated_at: "",
@@ -82,6 +83,12 @@ export function App() {
             >
               Pack Builder
             </button>
+            <button
+              className={tab === "snapshot" ? "active" : ""}
+              onClick={() => setTab("snapshot")}
+            >
+              Snapshot
+            </button>
           </nav>
           <div className="tab-content">
             {loadError && (
@@ -97,6 +104,7 @@ export function App() {
               <MetadataEditor path={selectedPath} registry={registry} />
             )}
             {tab === "pack" && <PackBuilder registry={registry} />}
+            {tab === "snapshot" && <SnapshotBuilder />}
           </div>
         </main>
       </div>
