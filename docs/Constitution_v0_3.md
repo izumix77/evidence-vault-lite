@@ -489,6 +489,11 @@ DGC topology 思想との整合。
 - section index（`kind: "section"`）
 - append-only frontmatter history
 - CRM reachability extraction
+- `GET /api/dirs` — サーバー側ディレクトリブラウザ API
+  - Snapshot Builder でフォルダを絶対パスで選択できるようにする
+  - `GET /api/dirs?path=F:\OSS_project` → サブディレクトリ一覧を返す
+  - ブラウザの File System Access API の制約（絶対パス取得不可）を回避
+  - versioned snapshot（`ev:stack.snapshot-v2 supersedes v1`）
 
 ---
 
