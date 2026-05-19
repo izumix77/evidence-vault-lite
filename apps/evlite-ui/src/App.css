@@ -72,15 +72,51 @@ body {
   overflow-y: auto;
 }
 
-.file-list-section h3 {
+.file-list-section-summary {
   margin: 0;
-  padding: 8px 12px 4px;
+  padding: 8px 12px;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #8b949e;
   background: #0e1117;
   border-top: 1px solid #30363d;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.file-list-section-summary::-webkit-details-marker {
+  display: none;
+}
+
+.file-list-section-summary::before {
+  content: "▶";
+  font-size: 8px;
+  width: 8px;
+  flex-shrink: 0;
+  color: #6e7681;
+}
+
+.file-list-section[open] > .file-list-section-summary::before {
+  content: "▼";
+}
+
+.file-list-section-summary:hover {
+  color: #c9d1d9;
+}
+
+.file-list-section-name {
+  /* inherits color from summary */
+}
+
+.file-list-section-count {
+  color: #6e7681;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .file-item {

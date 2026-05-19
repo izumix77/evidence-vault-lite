@@ -113,9 +113,25 @@ function FileSection({
 }: SectionProps) {
   if (files.length === 0) return null;
   const groups = buildGroups(files);
+  const sectionId = `__section__::${label}`;
+  const hasSelected = files.some((f) => f.path === selectedPath);
+  const isExpanded = hasSelected || !collapsed.has(sectionId);
+
+  function handleSummaryClick(e: MouseEvent<HTMLElement>) {
+    e.preventDefault();
+    if (hasSelected) return;
+    onToggle(sectionId);
+  }
+
   return (
-    <div className="file-list-section">
-      <h3>{`${label} (${files.length})`}</h3>
+    <details open={isExpanded} className="file-list-section">
+      <summary
+        className="file-list-section-summary"
+        onClick={handleSummaryClick}
+      >
+        <span className="file-list-section-name">{label}</span>
+        <span className="file-list-section-count">({files.length})</span>
+      </summary>
       {groups.map((group) => {
         const groupId = `${label}::${group.key}`;
         return (
@@ -131,7 +147,7 @@ function FileSection({
           />
         );
       })}
-    </div>
+    </details>
   );
 }
 
