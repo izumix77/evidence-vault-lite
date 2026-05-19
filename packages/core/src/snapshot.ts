@@ -144,12 +144,17 @@ function resolveContext(options: SnapshotOptions): ResolvedContext {
     : path.resolve(options.root, options.path);
   const basename = path.basename(absolutePath);
   const stack = options.stack ?? basename;
-  const evId = `ev:${stack}.snapshot-${basename}`;
+  const evId = `ev:${stack}.snapshot-${stack}-${basename}`;
   const sourcePath = toPosix(path.relative(options.root, absolutePath)) || ".";
   const title = options.title ?? `Directory: ${sourcePath}`;
   const output =
     options.output ??
-    path.join(options.root, ".ev-lite", "snapshots", `${basename}.md`);
+    path.join(
+      options.root,
+      ".ev-lite",
+      "snapshots",
+      `${stack}-${basename}.md`,
+    );
   const include = options.include?.length ? options.include : DEFAULT_INCLUDE;
   const exclude = [...DEFAULT_EXCLUDE, ...(options.exclude ?? [])];
 
