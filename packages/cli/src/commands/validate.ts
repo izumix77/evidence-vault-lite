@@ -1,6 +1,11 @@
 import path from "node:path";
 import pc from "picocolors";
-import { loadRegistry, type EvidenceStatus } from "@ev-lite/core";
+import {
+  loadRegistry,
+  listPackIds,
+  readPackConfig,
+  type EvidenceStatus,
+} from "@ev-lite/core";
 
 export type ValidateOptions = {
   root?: string;
@@ -60,6 +65,50 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
     for (const target of node.supersedes) {
       if (!existingEvIds.has(target)) {
         warn(`${source} supersedes missing → ${target}`);
+      }
+    }
+  }
+
+  const supersededBy = new Map<string, string>();
+  for (const node of registry.nodes) {
+    if (node.ev_id === null) continue;
+    for (const target of node.supersedes) {
+      supersededBy.set(target, node.ev_id);
+    }
+  }
+
+  const supersededWithDependents = new Map<string, string>();
+  for (const node of registry.nodes) {
+    for (const target of node.depends_on) {
+      const supersedorId = supersededBy.get(target);
+      if (supersedorId !== undefined) {
+        supersededWithDependents.set(target, supersedorId);
+      }
+    }
+  }
+  for (const [supersededId, supersedorId] of supersededWithDependents) {
+    warn(
+      `${supersededId} is Superseded\n      (superseded by ${supersedorId})`,
+    );
+  }
+
+  const packIds = await listPackIds(root);
+  for (const packId of packIds) {
+    let pack;
+    try {
+      pack = await readPackConfig(root, packId);
+    } catch (err: unknown) {
+      warn(
+        `failed to read pack ${packId}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      continue;
+    }
+    if (pack.status === "draft") continue;
+    for (const evId of pack.mustRead) {
+      if (supersededBy.has(evId)) {
+        warn(
+          `${pack.id} mustRead contains Superseded node\n      → ${evId}`,
+        );
       }
     }
   }
