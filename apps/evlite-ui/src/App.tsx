@@ -104,7 +104,9 @@ export function App() {
               <MetadataEditor path={selectedPath} registry={registry} />
             )}
             {tab === "pack" && <PackBuilder registry={registry} />}
-            {tab === "snapshot" && <SnapshotBuilder />}
+            {tab === "snapshot" && (
+              <SnapshotBuilder onRegistryUpdate={loadRegistry} />
+            )}
           </div>
         </main>
       </div>

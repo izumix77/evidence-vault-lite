@@ -28,11 +28,16 @@ function nonEmpty(values: string[]): string[] | undefined {
   return filtered.length > 0 ? filtered : undefined;
 }
 
-export function SnapshotBuilder() {
+type Props = {
+  onRegistryUpdate: () => void | Promise<void>;
+};
+
+export function SnapshotBuilder({ onRegistryUpdate }: Props) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [state, setState] = useState<SnapshotState>("idle");
   const [result, setResult] = useState<SnapshotResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [registryUpdated, setRegistryUpdated] = useState<boolean>(false);
 
   function updateField<K extends keyof FormState>(
     key: K,
@@ -46,6 +51,7 @@ export function SnapshotBuilder() {
     setState("generating");
     setErrorMsg("");
     setResult(null);
+    setRegistryUpdated(false);
     try {
       const meta = await api.generateSnapshot({
         path: form.path.trim(),
@@ -56,6 +62,14 @@ export function SnapshotBuilder() {
         noContent: form.noContent || undefined,
       });
       setResult(meta);
+      try {
+        await api.scan();
+        await onRegistryUpdate();
+        setRegistryUpdated(true);
+      } catch {
+        // snapshot succeeded but scan / registry refresh failed —
+        // surface the snapshot result anyway, user can rescan manually
+      }
       setState("success");
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : String(err));
@@ -144,6 +158,11 @@ export function SnapshotBuilder() {
             <span className="snapshot-result-label">files</span>
             <code>{result.fileCount}</code>
           </div>
+          {registryUpdated && (
+            <div className="snapshot-result-line">
+              <span className="saved-msg">✔ registry updated</span>
+            </div>
+          )}
         </div>
       )}
     </div>
