@@ -71,4 +71,15 @@ export const api = {
       { method: "POST" },
       "text",
     ),
+
+  getFavorites: () => request<string[]>("/favorites"),
+
+  addFavorite: (path: string) =>
+    request<string[]>("/favorites", {
+      method: "POST",
+      body: JSON.stringify({ path }),
+    }),
+
+  deleteFavorite: (idx: number) =>
+    request<string[]>(`/favorites/${idx}`, { method: "DELETE" }),
 };

@@ -40,3 +40,7 @@ export function getPackOutputPath(root: string, packId: string): string {
 export function getPacksDir(root: string): string {
   return path.join(root, EV_LITE_DIR, "packs");
 }
+
+export function getFavoritesPath(root: string): string {
+  return path.join(root, EV_LITE_DIR, "favorites.json");
+}

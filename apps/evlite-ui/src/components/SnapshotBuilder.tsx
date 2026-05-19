@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { SnapshotResult } from "../types";
 import { StringListEditor } from "./StringListEditor";
@@ -52,12 +52,51 @@ export function SnapshotBuilder({ onRegistryUpdate }: Props) {
   const [registryUpdated, setRegistryUpdated] = useState<boolean>(false);
   const [browseWarn, setBrowseWarn] = useState<string>("");
   const [browseSupported] = useState<boolean>(detectDirectoryPickerSupport);
+  const [favorites, setFavorites] = useState<string[]>([]);
+
+  useEffect(() => {
+    api
+      .getFavorites()
+      .then(setFavorites)
+      .catch(() => {
+        // ignore — favorites are optional
+      });
+  }, []);
 
   function updateField<K extends keyof FormState>(
     key: K,
     value: FormState[K],
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleSaveFavorite() {
+    const value = form.path.trim();
+    if (!value) return;
+    try {
+      const next = await api.addFavorite(value);
+      setFavorites(next);
+    } catch (err: unknown) {
+      setBrowseWarn(
+        `Save favorite failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  function handleUseFavorite(value: string) {
+    setForm((prev) => ({ ...prev, path: value }));
+    if (browseWarn) setBrowseWarn("");
+  }
+
+  async function handleDeleteFavorite(idx: number) {
+    try {
+      const next = await api.deleteFavorite(idx);
+      setFavorites(next);
+    } catch (err: unknown) {
+      setBrowseWarn(
+        `Delete favorite failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
   async function handleBrowse() {
@@ -132,6 +171,40 @@ export function SnapshotBuilder({ onRegistryUpdate }: Props) {
       </div>
       {browseWarn && (
         <div className="field-hint browse-warn">{browseWarn}</div>
+      )}
+
+      <div className="favorites-actions">
+        <button
+          type="button"
+          className="favorite-save-button"
+          onClick={handleSaveFavorite}
+          disabled={!form.path.trim()}
+        >
+          ★ Save to Favorites
+        </button>
+      </div>
+
+      {favorites.length > 0 && (
+        <div className="favorites">
+          <div className="favorites-title">Favorites</div>
+          {favorites.map((fav, i) => (
+            <div key={`${i}::${fav}`} className="favorite-row">
+              <span className="favorite-path">{fav}</span>
+              <button
+                type="button"
+                onClick={() => handleUseFavorite(fav)}
+              >
+                Use
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteFavorite(i)}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
       )}
 
       <div className="form-row">
