@@ -493,6 +493,15 @@ button.primary:hover {
 }
 
 /* ---------- Snapshot Builder ---------- */
+.browse-button {
+  flex-shrink: 0;
+}
+
+.browse-warn {
+  color: #d29922;
+  font-style: normal;
+}
+
 .form-row .checkbox-cell {
   display: flex;
   align-items: center;

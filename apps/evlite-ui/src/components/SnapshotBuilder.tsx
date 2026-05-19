@@ -3,6 +3,18 @@ import { api } from "../api/client";
 import type { SnapshotResult } from "../types";
 import { StringListEditor } from "./StringListEditor";
 
+type PickedDirectory = { name: string };
+
+type WindowWithDirectoryPicker = Window & {
+  showDirectoryPicker?: () => Promise<PickedDirectory>;
+};
+
+function detectDirectoryPickerSupport(): boolean {
+  if (typeof window === "undefined") return false;
+  const w = window as WindowWithDirectoryPicker;
+  return typeof w.showDirectoryPicker === "function";
+}
+
 type SnapshotState = "idle" | "generating" | "success" | "error";
 
 type FormState = {
@@ -38,12 +50,31 @@ export function SnapshotBuilder({ onRegistryUpdate }: Props) {
   const [result, setResult] = useState<SnapshotResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [registryUpdated, setRegistryUpdated] = useState<boolean>(false);
+  const [browseWarn, setBrowseWarn] = useState<string>("");
+  const [browseSupported] = useState<boolean>(detectDirectoryPickerSupport);
 
   function updateField<K extends keyof FormState>(
     key: K,
     value: FormState[K],
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleBrowse() {
+    const w = window as WindowWithDirectoryPicker;
+    if (!w.showDirectoryPicker) return;
+    try {
+      const handle = await w.showDirectoryPicker();
+      setForm((prev) => ({ ...prev, path: handle.name }));
+      setBrowseWarn(
+        `Picked "${handle.name}". Browsers cannot expose absolute paths — replace this with the path relative to the server root (e.g., packages/${handle.name}).`,
+      );
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      setBrowseWarn(
+        `Browse failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
   async function handleGenerate() {
@@ -83,10 +114,25 @@ export function SnapshotBuilder({ onRegistryUpdate }: Props) {
         <label>path</label>
         <input
           value={form.path}
-          onChange={(e) => updateField("path", e.target.value)}
+          onChange={(e) => {
+            updateField("path", e.target.value);
+            if (browseWarn) setBrowseWarn("");
+          }}
           placeholder="packages/core/src"
         />
+        {browseSupported && (
+          <button
+            type="button"
+            className="browse-button"
+            onClick={handleBrowse}
+          >
+            Browse...
+          </button>
+        )}
       </div>
+      {browseWarn && (
+        <div className="field-hint browse-warn">{browseWarn}</div>
+      )}
 
       <div className="form-row">
         <label>stack</label>
