@@ -34,6 +34,43 @@ node packages/cli/dist/index.js scan
 node packages/cli/dist/index.js ui
 ```
 
+## Installation
+
+### Windows (PowerShell)
+
+Global install via pnpm is not supported due to `workspace:*` dependencies.
+Use a PowerShell function instead:
+
+1. Open your PowerShell profile:
+
+```powershell
+notepad $PROFILE
+```
+
+2. Add the following line:
+
+```powershell
+function evlite { node "C:\path\to\evidence-vault-lite\packages\cli\dist\index.js" @args }
+```
+
+3. Reload the profile:
+
+```powershell
+. $PROFILE
+```
+
+4. Verify:
+
+```powershell
+evlite --version
+```
+
+### macOS / Linux
+
+```bash
+# coming soon: npm publish
+```
+
 ## Usage
 
 ### Existing repo
