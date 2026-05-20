@@ -115,8 +115,19 @@ supersedes: []
 | `evlite snapshot <path>` | generate code snapshot → `snapshot.md` |
 | `evlite pack <pack-id>` | generate `pack.md` from `pack.json` |
 | `evlite init-meta <file>` | insert frontmatter block |
-| `evlite validate` | check dependency integrity |
+| `evlite validate` | check dependency and topology integrity |
 | `evlite ui` | launch local UI → `localhost:3137` |
+
+### validate options
+
+| Option | Description |
+|---|---|
+| `--show-chains` | display supersedes chains derived from topology |
+| `--show-impact <ev_id>` | show all docs / packs impacted by this node *(Phase 4)* |
+| `--show-orphans` | show unreferenced nodes *(Phase 4)* |
+| `--show-depends` | display depends_on / related graph *(Phase 4)* |
+| `--show-cycles` | detect circular dependencies *(Phase 4)* |
+| `--strict` | exit 1 on errors |
 
 ### snapshot options
 
