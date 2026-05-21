@@ -207,6 +207,17 @@ evlite report my-impl --kind implementation --stack dgc
 
 - [ ] `derived_tags` を読み取り専用バッジとして表示（NEW / OLD / STALE / FOUNDATIONAL など）
 
+### 5-E. Pack Builder — mustRead Reorder 🔴
+
+**Design Principle:** `mustRead` is ordered context, not an unordered set.
+AI は先に読んだ文脈に強く引っ張られるため、順序は context routing の一部として扱う。
+
+- [ ] mustRead list に drag handle を表示し、drag & drop で順序変更できるようにする
+- [ ] ↑ / ↓ ボタンでも順序変更可能にする（キーボード操作・アクセシビリティ対応）
+- [ ] 保存時に `pack.json` の `mustRead` 配列順を更新
+- [ ] `@ev-lite/core` の pack.md 生成がこの順序をそのまま採用していることを確認
+  - ※ 現状 `mustRead` 配列をそのまま展開しているはずだが、念のため確認・テスト追加
+
 ---
 
 ## 6. 実装優先順位まとめ
@@ -217,16 +228,17 @@ evlite report my-impl --kind implementation --stack dgc
 | 🔴 2 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
 | 🔴 3 | `EVReport` 型 + zod + scan 認識 | shared / core | S |
 | 🔴 4 | `evlite validate --show-impact` | core / cli | S |
-| 🟠 5 | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
-| 🟠 6 | `evlite handover` / `evlite report` コマンド | cli | S |
-| 🟠 7 | `GET /api/dirs` + Directory Browser UI | server / ui | M |
-| 🟠 8 | `evlite validate --show-orphans/depends/cycles` | core / cli | S |
-| 🟡 9 | `ImportanceScore` 集計 + Usage Tags | core | M |
-| 🟡 10 | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
-| 🟡 11 | `GET /api/handovers` / `GET /api/reports` | server | XS |
-| 🟡 12 | Handover タブ / Report タブ | ui | M |
-| 🟡 13 | Metadata Editor DerivedTag バッジ | ui | S |
-| ⬜ 14 | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
+| 🔴 5 | Pack Builder — mustRead Reorder（drag & drop + ↑↓）| ui / core | S |
+| 🟠 6 | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
+| 🟠 7 | `evlite handover` / `evlite report` コマンド | cli | S |
+| 🟠 8 | `GET /api/dirs` + Directory Browser UI | server / ui | M |
+| 🟠 9 | `evlite validate --show-orphans/depends/cycles` | core / cli | S |
+| 🟡 10 | `ImportanceScore` 集計 + Usage Tags | core | M |
+| 🟡 11 | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
+| 🟡 12 | `GET /api/handovers` / `GET /api/reports` | server | XS |
+| 🟡 13 | Handover タブ / Report タブ | ui | M |
+| 🟡 14 | Metadata Editor DerivedTag バッジ | ui | S |
+| ⬜ 15 | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
 
 ---
 
@@ -239,6 +251,7 @@ evlite report my-impl --kind implementation --stack dgc
 - `RiskSignal` の解釈はUI / ObserverAI が行う。core は検出・出力のみ
 - `evlite report` の `report_kind: "implementation"` は Constitution v0.4 の "Implementation Report" の完全な上位互換
 - `stale` は `deprecated` とは別に残す（`deprecated` = 設計上非推奨、`stale` = 時間経過による陳腐化）
+- `ContextPack.mustRead` は順序付きコンテキストとして扱う。AI は先に読んだ文脈に引っ張られるため、順序は context routing の一部である。型変更は不要（既に `string[]`）。pack.md 生成は配列順をそのまま採用する
 
 ---
 
