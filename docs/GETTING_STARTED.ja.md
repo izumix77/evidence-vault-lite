@@ -1,3 +1,13 @@
+---
+ev_id: ev:docs.GETTING_STARTED.ja
+stack: docs
+status: draft
+tags: []
+depends_on: []
+related: []
+supersedes: []
+---
+
 # EvidenceVault Lite — Getting Started Guide
 
 > AIに必要な文脈だけを、構造的に渡す

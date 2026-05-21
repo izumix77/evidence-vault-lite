@@ -1,3 +1,13 @@
+---
+ev_id: ev:docs.GETTING_STARTED
+stack: docs
+status: draft
+tags: []
+depends_on: []
+related: []
+supersedes: []
+---
+
 # EvidenceVault Lite — Getting Started Guide
 
 > Deliver only the context AI needs — through human-defined structure.

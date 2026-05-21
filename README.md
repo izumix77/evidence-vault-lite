@@ -1,3 +1,13 @@
+---
+ev_id: ev:evidence-vault-lite.README
+stack: evidence-vault-lite
+status: draft
+tags: []
+depends_on: []
+related: []
+supersedes: []
+---
+
 # EvidenceVault Lite
 
 > Deliver only the context AI needs — through human-defined structure.

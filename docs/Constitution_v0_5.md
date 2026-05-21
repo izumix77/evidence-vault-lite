@@ -1,3 +1,14 @@
+---
+ev_id: 'ev:docs.Constitution_v0_5'
+stack: docs
+status: active
+tags: []
+depends_on: []
+related: []
+supersedes:
+  - 'ev:docs.Constitution_v0_4'
+---
+
 # EvidenceVault Lite — Constitution v0.5
 
 > **「AIに必要な文脈だけを、構造的に渡す」**

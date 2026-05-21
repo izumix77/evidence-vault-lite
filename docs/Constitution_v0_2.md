@@ -1,6 +1,6 @@
 ---
-ev_id: 'ev:evidence-vault-lite.constitution-v0-2'
-stack: evidence-vault-lite
+ev_id: 'ev:docs.constitution-v0-2'
+stack: docs
 status: active
 tags:
   - constitution
@@ -9,7 +9,7 @@ tags:
 depends_on: []
 related: []
 supersedes:
-  - 'ev:evidence-vault-lite.constitution'
+  - 'ev:docs.constitution'
 ---
 # EvidenceVault Lite — Constitution v0.2
 

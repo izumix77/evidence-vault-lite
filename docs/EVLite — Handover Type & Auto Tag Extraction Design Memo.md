@@ -1,3 +1,13 @@
+---
+ev_id: ev:docs.EVLite — Handover Type & Auto Tag Extraction Design Memo
+stack: docs
+status: draft
+tags: []
+depends_on: []
+related: []
+supersedes: []
+---
+
 # EVLite — Handover Type & Auto Tag Extraction Design Memo
 
 Status: Draft

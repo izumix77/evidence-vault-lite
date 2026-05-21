@@ -1,8 +1,10 @@
 ---
-ev_id: ev:evidence-vault-lite.constitution
-stack: evidence-vault-lite
+ev_id: 'ev:docs.constitution'
+stack: docs
 status: active
-tags: [constitution, core]
+tags:
+  - constitution
+  - core
 depends_on: []
 related: []
 supersedes: []

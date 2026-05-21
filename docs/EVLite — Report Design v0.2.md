@@ -1,3 +1,13 @@
+---
+ev_id: ev:docs.EVLite — Report Design v0.2
+stack: docs
+status: draft
+tags: []
+depends_on: []
+related: []
+supersedes: []
+---
+
 # EVLite — Report Design v0.2
 
 Status: Draft

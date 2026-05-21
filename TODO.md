@@ -1,3 +1,13 @@
+---
+ev_id: ev:evidence-vault-lite.TODO
+stack: evidence-vault-lite
+status: draft
+tags: []
+depends_on: []
+related: []
+supersedes: []
+---
+
 # EVLite — 機能追加 & TODO（確定版）
 
 **作成日:** 2026-05-21
