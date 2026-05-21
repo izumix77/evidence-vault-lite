@@ -55,6 +55,15 @@ function frontmatterToForm(fm: Record<string, unknown>): FormState {
   };
 }
 
+// "docs/Constitution_v0_1.md" → "docs"
+// "Constitution_v0_1.md"      → "" （ルート直下はフォルダなし）
+function getStackFromPath(filePath: string): string {
+  const normalized = filePath.replace(/\\/g, "/");
+  const parts = normalized.split("/").filter(Boolean);
+  if (parts.length <= 1) return "";
+  return parts[parts.length - 2];
+}
+
 function parseCsv(value: string): string[] {
   return value
     .split(",")
@@ -137,6 +146,19 @@ export function MetadataEditor({ path, registry, onScan }: Props) {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
+  function applyStackFromPath() {
+    if (!path) return;
+    const newStack = getStackFromPath(path);
+    if (!newStack) return;
+
+    setForm((prev) => {
+      if (!prev) return prev;
+      // ev_id の "ev:{oldStack}." を "ev:{newStack}." に置換
+      const newEvId = prev.ev_id.replace(/^ev:[^.]+\./, `ev:${newStack}.`);
+      return { ...prev, stack: newStack, ev_id: newEvId };
+    });
+  }
+
   async function handleAddMetadata() {
     if (!path) return;
     setState("saving");
@@ -216,6 +238,13 @@ export function MetadataEditor({ path, registry, onScan }: Props) {
           value={form.stack}
           onChange={(e) => updateField("stack", e.target.value)}
         />
+        <button
+          type="button"
+          onClick={applyStackFromPath}
+          title="Set stack from file path"
+        >
+          ← path
+        </button>
       </div>
 
       <div className="form-row">
