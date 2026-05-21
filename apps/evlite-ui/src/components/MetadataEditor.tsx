@@ -146,6 +146,9 @@ export function MetadataEditor({ path, registry, onScan }: Props) {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
+  const expectedStack = path ? getStackFromPath(path) : "";
+  const stackMismatch = expectedStack !== "" && form.stack !== expectedStack;
+
   function applyStackFromPath() {
     if (!path) return;
     const newStack = getStackFromPath(path);
@@ -241,7 +244,13 @@ export function MetadataEditor({ path, registry, onScan }: Props) {
         <button
           type="button"
           onClick={applyStackFromPath}
-          title="Set stack from file path"
+          disabled={!stackMismatch}
+          className={stackMismatch ? "btn-warn" : ""}
+          title={
+            stackMismatch
+              ? `stack mismatch — expected "${expectedStack}"`
+              : "stack matches path"
+          }
         >
           ← path
         </button>

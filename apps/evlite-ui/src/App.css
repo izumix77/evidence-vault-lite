@@ -45,6 +45,12 @@ body {
   font-weight: 400;
 }
 
+.btn-warn {
+  color: orange;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
 .app-body {
   display: flex;
   flex: 1;
