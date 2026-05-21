@@ -202,6 +202,7 @@ export function PackBuilder({ registry }: Props) {
         onChange={(v) => setPack((prev) => ({ ...prev, mustRead: v }))}
         registry={registry}
         listIdPrefix="pack-mustRead"
+        reorderable={true}
       />
 
       <ListField
