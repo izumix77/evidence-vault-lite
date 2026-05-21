@@ -3,6 +3,7 @@ import { getSettingsPath } from "./paths.js";
 
 export type EvLiteSettings = {
   port?: number;
+  description?: string;
 };
 
 export async function readSettings(root: string): Promise<EvLiteSettings> {
