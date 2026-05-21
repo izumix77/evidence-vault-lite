@@ -15,6 +15,12 @@ const EMPTY_REGISTRY: Registry = {
   nodes: [],
 };
 
+function getBasename(root: string): string {
+  if (!root) return "";
+  const normalized = root.replace(/\\/g, "/");
+  return normalized.split("/").filter(Boolean).pop() ?? "";
+}
+
 export function App() {
   const [registry, setRegistry] = useState<Registry>(EMPTY_REGISTRY);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
@@ -57,7 +63,15 @@ export function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>EvidenceVault Lite</h1>
+        <h1>
+          EvidenceVault Lite
+          {getBasename(registry.root) && (
+            <span className="app-header-repo">
+              {" "}
+              | {getBasename(registry.root)}
+            </span>
+          )}
+        </h1>
       </header>
       <div className="app-body">
         <aside className="sidebar">

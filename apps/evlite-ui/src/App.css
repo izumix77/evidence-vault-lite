@@ -39,6 +39,12 @@ body {
   letter-spacing: 0.02em;
 }
 
+.app-header-repo {
+  font-size: 0.85em;
+  opacity: 0.6;
+  font-weight: 400;
+}
+
 .app-body {
   display: flex;
   flex: 1;
