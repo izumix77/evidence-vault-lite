@@ -403,13 +403,8 @@ ERROR: duplicate ev_id → ev:traceid.phase1 (2 files)
 ### .gitignore の推奨設定
 
 ```
-# 生成物は除外
-.ev-lite/registry.json
-.ev-lite/snapshots/
-.ev-lite/packs/*.md
-
-# pack の定義（.json）は git 管理対象にする
-# .ev-lite/packs/*.json → commit する
+# .ev-lite/ はすべて除外（個人の環境情報が含まれるため）
+.ev-lite/
 ```
 
 ---

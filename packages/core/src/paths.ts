@@ -44,3 +44,7 @@ export function getPacksDir(root: string): string {
 export function getFavoritesPath(root: string): string {
   return path.join(root, EV_LITE_DIR, "favorites.json");
 }
+
+export function getSettingsPath(root: string): string {
+  return path.join(root, EV_LITE_DIR, "settings.json");
+}

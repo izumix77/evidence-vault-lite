@@ -408,8 +408,7 @@ ERROR: duplicate ev_id → ev:traceid.phase1 (2 files)
 .ev-lite/snapshots/
 .ev-lite/packs/*.md
 
-# pack definitions — commit these
-# .ev-lite/packs/*.json → include in git
+# pack definitions — personal use only, do not commit to public repos
 ```
 
 ---
