@@ -12,6 +12,7 @@ export type ValidateOptions = {
   root?: string;
   strict?: boolean;
   showChains?: boolean;
+  showImpact?: string;
 };
 
 export async function runValidate(options: ValidateOptions): Promise<void> {
@@ -111,6 +112,54 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
         warn(
           `${pack.id} mustRead contains Superseded node\n      → ${evId}`,
         );
+      }
+    }
+  }
+
+  if (options.showImpact) {
+    const targetId = options.showImpact;
+
+    type ImpactEntry = { id: string; via: string };
+    const impactDocs: ImpactEntry[] = [];
+    const impactPacks: ImpactEntry[] = [];
+
+    for (const node of registry.nodes) {
+      const source = node.ev_id ?? node.path;
+      if (node.depends_on.includes(targetId))
+        impactDocs.push({ id: source, via: "depends_on" });
+      if (node.related.includes(targetId))
+        impactDocs.push({ id: source, via: "related" });
+      if (node.supersedes.includes(targetId))
+        impactDocs.push({ id: source, via: "supersedes" });
+    }
+
+    for (const packId of packIds) {
+      try {
+        const pack = await readPackConfig(root, packId);
+        if (pack.mustRead.includes(targetId))
+          impactPacks.push({ id: pack.id, via: "mustRead" });
+      } catch {
+        // 読み込み失敗は無視
+      }
+    }
+
+    console.log("");
+    console.log(`Impact of ${pc.cyan(targetId)}:`);
+
+    if (impactDocs.length === 0 && impactPacks.length === 0) {
+      console.log("  (no references found)");
+    } else {
+      if (impactDocs.length > 0) {
+        console.log("  Docs:");
+        for (const entry of impactDocs) {
+          console.log(`    ${entry.id} ${pc.gray(`(${entry.via})`)}`);
+        }
+      }
+      if (impactPacks.length > 0) {
+        console.log("  Packs:");
+        for (const entry of impactPacks) {
+          console.log(`    ${entry.id} ${pc.gray(`(${entry.via})`)}`);
+        }
       }
     }
   }

@@ -52,16 +52,22 @@ program
   .option("--root <path>", "root directory")
   .option("--strict", "exit 1 if any ERROR is found")
   .option("--show-chains", "print supersedes chains derived from topology")
+  .option(
+    "--show-impact <ev_id>",
+    "show all docs and packs referencing the given ev_id",
+  )
   .action(
     async (opts: {
       root?: string;
       strict?: boolean;
       showChains?: boolean;
+      showImpact?: string;
     }) => {
       await runValidate({
         root: opts.root,
         strict: opts.strict,
         showChains: opts.showChains,
+        showImpact: opts.showImpact,
       });
     },
   );
