@@ -7,6 +7,7 @@ import { runInitMeta } from "./commands/init-meta.js";
 import { runValidate } from "./commands/validate.js";
 import { runUi } from "./commands/ui.js";
 import { runSnapshot } from "./commands/snapshot.js";
+import { runReport } from "./commands/report.js";
 
 function collect(value: string, previous: string[]): string[] {
   return [...previous, value];
@@ -119,6 +120,29 @@ program
         include: opts.include,
         exclude: opts.exclude,
         noContent: opts.content === false,
+      });
+    },
+  );
+
+program
+  .command("report <name>")
+  .description("Generate an EVReport scaffold")
+  .option(
+    "--kind <kind>",
+    "report kind (implementation|analysis|architecture|research|incident|observer|retrospective)",
+    "implementation",
+  )
+  .option("--stack <stack>", "frontmatter stack value", "docs")
+  .option("--output <path>", "output file path")
+  .action(
+    async (
+      name: string,
+      opts: { kind?: string; stack?: string; output?: string },
+    ) => {
+      await runReport(name, {
+        kind: opts.kind,
+        stack: opts.stack,
+        output: opts.output,
       });
     },
   );
