@@ -292,15 +292,15 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 |------|--------|------|------|
 | ✅ | Pack Builder — mustRead Reorder（drag & drop + ↑↓）| ui | S |
 | ✅ | `evlite ui --port` + `settings.json` 対応 | cli / core | S |
-| 🔴 P1 | `evlite validate --show-impact` | core / cli | S |
-| 🔴 P2-a | `EvidenceStatus` に `superseded` / `stale` を追加 | shared | XS |
-| 🔴 P2-b | `EVReport` 型 + zod + scan 認識（Implementation Report 標準化） | shared / core | S |
-| 🔴 P2-c | `evlite report` コマンド（スキャフォールド生成） | cli | S |
-| 🟠 P3-a | `GET /api/reports` | server | XS |
-| 🟠 P3-b | Report タブ UI | ui | M |
-| 🟠 P4 | `evlite validate --show-orphans` | core / cli | S |
-| 🟠 P5 | `evlite validate --show-depends` | core / cli | S |
-| 🟠 P6 | `evlite validate --show-cycles` | core / cli | S |
+| ✅ P1 | `evlite validate --show-impact` | core / cli | S |
+| ✅ P2-a | `EvidenceStatus` に `superseded` / `stale` を追加 | shared | XS |
+| ✅ P2-b | `EVReport` 型 + zod + scan 認識（Implementation Report 標準化） | shared / core | S |
+| ✅ P2-c | `evlite report` コマンド（スキャフォールド生成） | cli | S |
+| ✅ P3-a | `GET /api/reports` | server | XS |
+| ✅ P3-b | Report タブ UI | ui | M |
+| ✅ P4 | `evlite validate --show-orphans` | core / cli | S |
+| ✅ P5 | `evlite validate --show-depends` | core / cli | S |
+| ✅ P6 | `evlite validate --show-cycles` | core / cli | S |
 | 🟡 P7 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
 | 🟡 — | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
 | 🟡 — | `evlite handover` コマンド | cli | S |
