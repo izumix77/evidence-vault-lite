@@ -282,24 +282,33 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 
 ## 6. 実装優先順位まとめ
 
+> **優先順位の思想:**
+> 「AIを強くする」ではなく「認知資産を壊れにくくする」を優先する。
+> impact / report / graph introspection を先に置き、派手な Agent 機能は後回し。
+
 | 優先 | タスク | 場所 | 規模 |
 |------|--------|------|------|
 | ✅ | Pack Builder — mustRead Reorder（drag & drop + ↑↓）| ui | S |
-| 🔴 1 | `EvidenceStatus` に `superseded` / `stale` を追加 | shared | XS |
-| 🔴 2 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
-| 🔴 3 | `EVReport` 型 + zod + scan 認識 | shared / core | S |
-| 🔴 4 | `evlite validate --show-impact` | core / cli | S |
 | ✅ | `evlite ui --port` + `settings.json` 対応 | cli / core | S |
-| 🟠 6 | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
-| 🟠 7 | `evlite handover` / `evlite report` コマンド | cli | S |
-| 🟠 8 | `GET /api/dirs` + Directory Browser UI | server / ui | M |
-| 🟠 9 | `evlite validate --show-orphans/depends/cycles` | core / cli | S |
-| 🟡 10 | `ImportanceScore` 集計 + Usage Tags | core | M |
-| 🟡 11 | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
-| 🟡 12 | `GET /api/handovers` / `GET /api/reports` | server | XS |
-| 🟡 13 | Handover タブ / Report タブ | ui | M |
-| 🟡 14 | Metadata Editor DerivedTag バッジ | ui | S |
-| ⬜ 15 | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
+| 🔴 P1 | `evlite validate --show-impact` | core / cli | S |
+| 🔴 P2-a | `EvidenceStatus` に `superseded` / `stale` を追加 | shared | XS |
+| 🔴 P2-b | `EVReport` 型 + zod + scan 認識（Implementation Report 標準化） | shared / core | S |
+| 🔴 P2-c | `evlite report` コマンド（スキャフォールド生成） | cli | S |
+| 🟠 P3-a | `GET /api/reports` | server | XS |
+| 🟠 P3-b | Report タブ UI | ui | M |
+| 🟠 P4 | `evlite validate --show-orphans` | core / cli | S |
+| 🟠 P5 | `evlite validate --show-depends` | core / cli | S |
+| 🟠 P6 | `evlite validate --show-cycles` | core / cli | S |
+| 🟡 P7 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
+| 🟡 — | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
+| 🟡 — | `evlite handover` コマンド | cli | S |
+| 🟡 — | `GET /api/handovers` + Handover タブ UI | server / ui | M |
+| 🟡 — | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
+| 🟡 — | `GET /api/dirs` + Directory Browser UI | server / ui | M |
+| 🟡 — | `ImportanceScore` 集計 + Usage Tags | core | M |
+| 🟡 — | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
+| 🟡 — | Metadata Editor DerivedTag バッジ | ui | S |
+| ⬜ — | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
 
 ---
 
