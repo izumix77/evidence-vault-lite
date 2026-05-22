@@ -1,9 +1,11 @@
 ---
-ev_id: ev:evidence-vault-lite.TODO
+ev_id: 'ev:evidence-vault-lite.TODO'
 stack: evidence-vault-lite
-status: draft
-tags: []
-depends_on: []
+status: active
+tags:
+  - todo
+depends_on:
+  - 'ev:docs.Constitution_v0_5'
 related: []
 supersedes: []
 ---

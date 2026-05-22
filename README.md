@@ -1,10 +1,12 @@
 ---
-ev_id: ev:evidence-vault-lite.README
+ev_id: 'ev:evidence-vault-lite.README'
 stack: evidence-vault-lite
-status: draft
+status: active
 tags: []
 depends_on: []
-related: []
+related:
+  - 'ev:docs.GETTING_STARTED'
+  - 'ev:docs.GETTING_STARTED.ja'
 supersedes: []
 ---
 

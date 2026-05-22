@@ -1,10 +1,11 @@
 ---
-ev_id: ev:docs.GETTING_STARTED.ja
+ev_id: 'ev:docs.GETTING_STARTED.ja'
 stack: docs
-status: draft
+status: active
 tags: []
 depends_on: []
-related: []
+related:
+  - 'ev:evidence-vault-lite.README'
 supersedes: []
 ---
 
