@@ -57,18 +57,33 @@ program
     "--show-impact <ev_id>",
     "show all docs and packs referencing the given ev_id",
   )
+  .option("--show-orphans", "list nodes not referenced by any doc or pack")
+  .option(
+    "--show-depends",
+    "show depends_on / related / supersedes structure",
+  )
+  .option(
+    "--show-cycles",
+    "detect circular dependencies in depends_on / supersedes",
+  )
   .action(
     async (opts: {
       root?: string;
       strict?: boolean;
       showChains?: boolean;
       showImpact?: string;
+      showOrphans?: boolean;
+      showDepends?: boolean;
+      showCycles?: boolean;
     }) => {
       await runValidate({
         root: opts.root,
         strict: opts.strict,
         showChains: opts.showChains,
         showImpact: opts.showImpact,
+        showOrphans: opts.showOrphans,
+        showDepends: opts.showDepends,
+        showCycles: opts.showCycles,
       });
     },
   );

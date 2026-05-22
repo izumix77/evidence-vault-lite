@@ -13,6 +13,9 @@ export type ValidateOptions = {
   strict?: boolean;
   showChains?: boolean;
   showImpact?: string;
+  showOrphans?: boolean;
+  showDepends?: boolean;
+  showCycles?: boolean;
 };
 
 export async function runValidate(options: ValidateOptions): Promise<void> {
@@ -208,6 +211,116 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
     } else {
       for (const rootId of chainRoots) {
         printChain(rootId, 0, new Set());
+      }
+    }
+  }
+
+  if (options.showOrphans) {
+    const referencedEvIds = new Set<string>();
+
+    for (const node of registry.nodes) {
+      for (const id of [
+        ...node.depends_on,
+        ...node.related,
+        ...node.supersedes,
+      ]) {
+        referencedEvIds.add(id);
+      }
+    }
+
+    for (const packId of packIds) {
+      try {
+        const pack = await readPackConfig(root, packId);
+        for (const id of pack.mustRead) {
+          referencedEvIds.add(id);
+        }
+      } catch {
+        // 無視
+      }
+    }
+
+    const orphans = registry.nodes.filter(
+      (node) => node.ev_id !== null && !referencedEvIds.has(node.ev_id),
+    );
+
+    console.log("");
+    console.log("Orphan nodes (not referenced by any doc or pack):");
+    if (orphans.length === 0) {
+      console.log("  (none)");
+    } else {
+      for (const node of orphans) {
+        console.log(`  ${node.ev_id} ${pc.gray(`(${node.path})`)}`);
+      }
+    }
+  }
+
+  if (options.showDepends) {
+    const nodesWithDeps = registry.nodes.filter(
+      (node) =>
+        node.ev_id !== null &&
+        (node.depends_on.length > 0 ||
+          node.related.length > 0 ||
+          node.supersedes.length > 0),
+    );
+
+    console.log("");
+    console.log("Dependency structure:");
+
+    if (nodesWithDeps.length === 0) {
+      console.log("  (none)");
+    } else {
+      for (const node of nodesWithDeps) {
+        console.log(`  ${node.ev_id}`);
+        for (const id of node.depends_on) {
+          console.log(`    depends_on  → ${id}`);
+        }
+        for (const id of node.related) {
+          console.log(`    related     → ${id}`);
+        }
+        for (const id of node.supersedes) {
+          console.log(`    supersedes  → ${id}`);
+        }
+      }
+    }
+  }
+
+  if (options.showCycles) {
+    const adjacency = new Map<string, string[]>();
+    for (const node of registry.nodes) {
+      if (!node.ev_id) continue;
+      adjacency.set(node.ev_id, [...node.depends_on, ...node.supersedes]);
+    }
+
+    const cycles: string[][] = [];
+    const visited = new Set<string>();
+    const inStack = new Set<string>();
+
+    const dfs = (id: string, path: string[]): void => {
+      if (inStack.has(id)) {
+        const cycleStart = path.indexOf(id);
+        cycles.push(path.slice(cycleStart));
+        return;
+      }
+      if (visited.has(id)) return;
+      visited.add(id);
+      inStack.add(id);
+      for (const neighbor of adjacency.get(id) ?? []) {
+        dfs(neighbor, [...path, neighbor]);
+      }
+      inStack.delete(id);
+    };
+
+    for (const id of adjacency.keys()) {
+      dfs(id, [id]);
+    }
+
+    console.log("");
+    console.log("Cycle detection:");
+    if (cycles.length === 0) {
+      console.log("  (no cycles found)");
+    } else {
+      for (const cycle of cycles) {
+        console.log(`  ${pc.red("CYCLE:")} ${cycle.join(" → ")}`);
       }
     }
   }
