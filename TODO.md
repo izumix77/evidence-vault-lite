@@ -227,7 +227,7 @@ AI は先に読んだ文脈に強く引っ張られるため、順序は context
 - [x] 保存時に `pack.json` の `mustRead` 配列順を更新
 - [ ] `@ev-lite/core` の pack.md 生成がこの順序をそのまま採用していることを確認・テスト追加
 
-### 5-F. evlite ui — マルチルート対応（--port / settings.json）🟠
+### 5-F. evlite ui — マルチルート対応（--port / settings.json）✅
 
 複数の root を同時に別ポートで立ち上げられるようにする。
 例：`evidence-vault-lite` 開発用と `dgc-ecosystem-docs` 参照用を並走。
@@ -249,10 +249,34 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 
 優先順位: `--port オプション` > `settings.json` > デフォルト `3137`
 
-- [ ] `evlite ui` に `--port <number>` オプションを追加（cli）
-- [ ] `.ev-lite/settings.json` のパースと `port` フィールドの読み込み（core）
-- [ ] 優先順位の適用（`--port` > `settings.json` > `3137`）
-- [ ] 起動ログに使用ポートを表示（既存の `✔ Serving: http://localhost:{port}` で対応）
+- [x] `evlite ui` に `--port <number>` オプションを追加（cli）
+- [x] `.ev-lite/settings.json` のパースと `port` フィールドの読み込み（core）
+- [x] 優先順位の適用（`--port` > `settings.json` > `3137`）
+- [x] 起動ログに使用ポートを表示（既存の `✔ Serving: http://localhost:{port}` で対応）
+
+### 5-G. ヘッダーへのリポジトリ名表示 ✅
+
+- [x] `registry.root` の basename をヘッダーに表示（`App.tsx`）
+- [x] 初期状態（root が空）では非表示
+- [x] Windows パス（`\`）対応
+- [x] `.app-header-repo` スタイル追加（`App.css`）
+
+### 5-H. MetadataEditor — stack mismatch 警告 ✅
+
+- [x] `← path` ボタンを追加（stack をフォルダ名から自動入力）
+- [x] stack が path のフォルダ名と一致しない場合にボタンを orange / bold で強調
+- [x] 一致している場合はボタンを disabled
+- [x] hover の title に期待値を表示（`stack mismatch — expected "xxx"`）
+- [x] ev_id の stack 部分も同時に置換
+
+### 5-I. スクロールバーのスタイル統一 ✅
+
+- [x] `::-webkit-scrollbar` / `track` / `thumb` / `thumb:hover` を dark theme に合わせて追加（`App.css`）
+
+### 5-J. settings.json description フィールド ✅
+
+- [x] `EvLiteSettings` に `description?: string` を追加
+- [x] 起動ログに description を表示（`settings.description` がある場合のみ）
 
 ---
 
@@ -265,7 +289,7 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 | 🔴 2 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
 | 🔴 3 | `EVReport` 型 + zod + scan 認識 | shared / core | S |
 | 🔴 4 | `evlite validate --show-impact` | core / cli | S |
-| 🟠 5 | `evlite ui --port` + `settings.json` 対応 | cli / core | S |
+| ✅ | `evlite ui --port` + `settings.json` 対応 | cli / core | S |
 | 🟠 6 | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
 | 🟠 7 | `evlite handover` / `evlite report` コマンド | cli | S |
 | 🟠 8 | `GET /api/dirs` + Directory Browser UI | server / ui | M |
