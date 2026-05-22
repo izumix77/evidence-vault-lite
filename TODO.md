@@ -301,15 +301,15 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 | ✅ P4 | `evlite validate --show-orphans` | core / cli | S |
 | ✅ P5 | `evlite validate --show-depends` | core / cli | S |
 | ✅ P6 | `evlite validate --show-cycles` | core / cli | S |
-| 🟡 P7 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
-| 🟡 — | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
-| 🟡 — | `evlite handover` コマンド | cli | S |
-| 🟡 — | `GET /api/handovers` + Handover タブ UI | server / ui | M |
-| 🟡 — | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
-| 🟡 — | `GET /api/dirs` + Directory Browser UI | server / ui | M |
-| 🟡 — | `ImportanceScore` 集計 + Usage Tags | core | M |
-| 🟡 — | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
-| 🟡 — | Metadata Editor DerivedTag バッジ | ui | S |
+| 🟡 P7-1 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
+| 🟡 P7-2 | `evlite handover` コマンド | cli | S |
+| 🟡 P7-3 | `GET /api/handovers` + Handover タブ UI | server / ui | M |
+| 🟡 P8 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
+| 🟡 P9-a | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
+| 🟡 P9-b | `ImportanceScore` 集計 + Usage Tags | core | M |
+| 🟡 P9-c | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
+| 🟡 P9-d | Metadata Editor DerivedTag バッジ | ui | S |
+| 🟡 P9-e | `GET /api/dirs` + Directory Browser UI | server / ui | M |
 | ⬜ — | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
 
 ---
