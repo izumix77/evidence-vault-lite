@@ -4,10 +4,11 @@ import { FileList } from "./components/FileList";
 import { MetadataEditor } from "./components/MetadataEditor";
 import { PackBuilder } from "./components/PackBuilder";
 import { SnapshotBuilder } from "./components/SnapshotBuilder";
+import { ReportViewer } from "./components/ReportViewer";
 import type { Registry } from "./types";
 import "./App.css";
 
-type Tab = "metadata" | "pack" | "snapshot";
+type Tab = "metadata" | "pack" | "snapshot" | "reports";
 
 const EMPTY_REGISTRY: Registry = {
   generated_at: "",
@@ -103,6 +104,12 @@ export function App() {
             >
               Snapshot
             </button>
+            <button
+              className={tab === "reports" ? "active" : ""}
+              onClick={() => setTab("reports")}
+            >
+              Reports
+            </button>
           </nav>
           <div className="tab-content">
             {loadError && (
@@ -125,6 +132,7 @@ export function App() {
             {tab === "snapshot" && (
               <SnapshotBuilder onRegistryUpdate={loadRegistry} />
             )}
+            {tab === "reports" && <ReportViewer />}
           </div>
         </main>
       </div>

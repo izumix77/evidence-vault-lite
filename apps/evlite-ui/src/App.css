@@ -682,3 +682,97 @@ button.primary:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: #484f58;
 }
+
+/* ---------- Report Viewer ---------- */
+.report-viewer {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+}
+
+.report-list {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid #30363d;
+  overflow-y: auto;
+  padding-right: 16px;
+}
+
+.report-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.report-item:hover {
+  background: #1f2933;
+}
+
+.report-item.selected {
+  background: #1f2933;
+  border-left-color: #58a6ff;
+}
+
+.report-item-evid {
+  display: block;
+  color: #58a6ff;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.report-item-title {
+  display: block;
+  color: #8b949e;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.report-detail {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.report-detail-content h2 {
+  font-size: 13px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #58a6ff;
+  word-break: break-all;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+.report-detail-title {
+  color: #c9d1d9;
+  font-size: 13px;
+  margin: 0 0 16px;
+}
+
+.report-detail-value {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: #e6edf3;
+  padding-top: 7px;
+}
+
+.report-detail-excerpt label {
+  display: block;
+  font-size: 11px;
+  color: #8b949e;
+  margin-bottom: 6px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.report-detail-excerpt pre {
+  background: #0e1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #8b949e;
+  margin: 0;
+}

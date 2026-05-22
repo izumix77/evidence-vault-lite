@@ -33,6 +33,8 @@ export const api = {
 
   getFiles: () => request<EvidenceNode[]>("/files"),
 
+  getReports: () => request<EvidenceNode[]>("/reports"),
+
   getFile: (path: string) =>
     request<MarkdownFilePayload>(`/file?path=${encodeURIComponent(path)}`),
 
