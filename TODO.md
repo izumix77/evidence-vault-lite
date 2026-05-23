@@ -280,6 +280,14 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 - [x] `EvLiteSettings` に `description?: string` を追加
 - [x] 起動ログに description を表示（`settings.description` がある場合のみ）
 
+### 5-K. ファイルリスト — ソート切り替え 🟠
+
+- [ ] 名前順（現在のデフォルト）/ status順 / scan順 の3択切り替えを追加
+- [ ] status順: `active → draft → experimental → deprecated → archived → superseded → stale`
+- [ ] scan順: registry の登録順（`registry.json` の配列順）
+- [ ] 切り替えは UI 上部のボタンまたはセレクタで操作
+- [ ] server / core の変更は不要（UI 側のみ）
+
 ---
 
 ## 6. 実装優先順位まとめ
@@ -301,6 +309,7 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 | ✅ P4 | `evlite validate --show-orphans` | core / cli | S |
 | ✅ P5 | `evlite validate --show-depends` | core / cli | S |
 | ✅ P6 | `evlite validate --show-cycles` | core / cli | S |
+| 🟠 P6.5 | ファイルリスト ソート切り替え（名前順 / status順 / scan順） | ui | S |
 | 🟡 P7-1 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
 | 🟡 P7-2 | `evlite handover` コマンド | cli | S |
 | 🟡 P7-3 | `GET /api/handovers` + Handover タブ UI | server / ui | M |
