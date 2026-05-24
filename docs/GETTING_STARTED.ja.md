@@ -2,10 +2,13 @@
 ev_id: 'ev:docs.GETTING_STARTED.ja'
 stack: docs
 status: active
-tags: []
+tags:
+  - GETTING_STARTED
+  - ja
 depends_on: []
 related:
   - 'ev:evidence-vault-lite.README'
+  - 'ev:docs.GETTING_STARTED'
 supersedes: []
 ---
 

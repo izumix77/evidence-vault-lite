@@ -2,7 +2,8 @@
 ev_id: 'ev:evidence-vault-lite.README'
 stack: evidence-vault-lite
 status: active
-tags: []
+tags:
+  - README
 depends_on: []
 related:
   - 'ev:docs.GETTING_STARTED'
