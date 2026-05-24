@@ -133,6 +133,7 @@ Impact:
 ### 2-F. validate — --show-depends 🟠
 
 - [ ] `depends_on` / `related` / `supersedes` の構造をツリー表示
+- [ ] `--active-only` オプション: superseded でない related のみ表示
 
 ### 2-G. validate — --show-cycles 🟠
 
@@ -307,7 +308,7 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 | ✅ P3-a | `GET /api/reports` | server | XS |
 | ✅ P3-b | Report タブ UI | ui | M |
 | ✅ P4 | `evlite validate --show-orphans` | core / cli | S |
-| ✅ P5 | `evlite validate --show-depends` | core / cli | S |
+| ✅ P5 | `evlite validate --show-depends`（`--active-only` オプション追加予定） | core / cli | S |
 | ✅ P6 | `evlite validate --show-cycles` | core / cli | S |
 | 🟠 P6.5 | ファイルリスト ソート切り替え（名前順 / status順 / scan順） | ui | S |
 | 🟡 P7-1 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
