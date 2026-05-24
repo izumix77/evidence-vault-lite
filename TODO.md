@@ -152,6 +152,31 @@ Constitution v0.5 §2.9 の 3 種を検出して出力する。
 - [ ] `knowledge_bottleneck` — 複数 pack が同一 SUPERSEDED pack に依存している検出
 - [ ] `semantic_monoculture` — HOT 文書が canonical でない検出
 
+### 2-J. validate — --output オプション 🟠
+
+validate の出力をファイルに保存する。EVReport として registry に登録・管理できる。
+
+```powershell
+evlite validate --show-depends --show-chains --show-orphans --output validate-report.md
+```
+
+- [ ] `--output <path>` オプションを追加
+- [ ] 指定した path に validate の全出力を書き込む
+- [ ] `--show-*` オプションと自由に組み合わせ可能
+
+### 2-K. validate — --focus / --focus-dir 🟠
+
+特定の node またはフォルダに関連する全情報を一括出力する。
+
+```powershell
+evlite validate --focus ev:AgentRelay.xxx --output focus-report.md
+evlite validate --focus-dir AgentRelay/ --output agentrelay-report.md
+```
+
+- [ ] `--focus <ev_id>` — 指定 node の impact / depends / chains を一括表示
+- [ ] `--focus-dir <path>` — フォルダ内全 node の情報を一括表示
+- [ ] `--output` と組み合わせてファイル出力可能
+
 ---
 
 ## 3. `@ev-lite/cli` — コマンド追加
@@ -310,6 +335,8 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 | ✅ P4 | `evlite validate --show-orphans` | core / cli | S |
 | ✅ P5 | `evlite validate --show-depends`（`--active-only` オプション追加予定） | core / cli | S |
 | ✅ P6 | `evlite validate --show-cycles` | core / cli | S |
+| 🟠 P6-ext-a | `evlite validate --output` オプション | core / cli | S |
+| 🟠 P6-ext-b | `evlite validate --focus` / `--focus-dir` オプション | core / cli | S |
 | 🟠 P6.5 | ファイルリスト ソート切り替え（名前順 / status順 / scan順） | ui | S |
 | 🟡 P7-1 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
 | 🟡 P7-2 | `evlite handover` コマンド | cli | S |
