@@ -66,6 +66,16 @@ program
     "--show-cycles",
     "detect circular dependencies in depends_on / supersedes",
   )
+  .option("--output <path>", "save validate output to a file")
+  .option("--focus <ev_id>", "show all info for the specified ev_id")
+  .option(
+    "--focus-dir <path>",
+    "show all info for nodes in the specified directory",
+  )
+  .option(
+    "--active-only",
+    "with --show-depends: skip superseded related nodes",
+  )
   .action(
     async (opts: {
       root?: string;
@@ -75,6 +85,10 @@ program
       showOrphans?: boolean;
       showDepends?: boolean;
       showCycles?: boolean;
+      output?: string;
+      focus?: string;
+      focusDir?: string;
+      activeOnly?: boolean;
     }) => {
       await runValidate({
         root: opts.root,
@@ -84,6 +98,10 @@ program
         showOrphans: opts.showOrphans,
         showDepends: opts.showDepends,
         showCycles: opts.showCycles,
+        output: opts.output,
+        focus: opts.focus,
+        focusDir: opts.focusDir,
+        activeOnly: opts.activeOnly,
       });
     },
   );

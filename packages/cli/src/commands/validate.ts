@@ -1,4 +1,5 @@
 import path from "node:path";
+import { writeFile, mkdir } from "node:fs/promises";
 import pc from "picocolors";
 import {
   loadRegistry,
@@ -16,12 +17,30 @@ export type ValidateOptions = {
   showOrphans?: boolean;
   showDepends?: boolean;
   showCycles?: boolean;
+  output?: string;
+  focus?: string;
+  focusDir?: string;
+  activeOnly?: boolean;
 };
 
 export async function runValidate(options: ValidateOptions): Promise<void> {
   const root = options.root ? path.resolve(options.root) : process.cwd();
   const registryPath = path.join(root, ".ev-lite", "registry.json");
   const registry = await loadRegistry(registryPath);
+
+  const outputLines: string[] = [];
+
+  const log = (...args: unknown[]) => {
+    const plain = args
+      .map((a) =>
+        typeof a === "string"
+          ? a.replace(/\x1b\[[0-9;]*m/g, "")
+          : String(a),
+      )
+      .join(" ");
+    outputLines.push(plain);
+    console.log(...args);
+  };
 
   const evIdCounts = new Map<string, number>();
   const statusByEvId = new Map<string, EvidenceStatus | undefined>();
@@ -36,11 +55,11 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
   let warnCount = 0;
 
   const warn = (msg: string) => {
-    console.log(pc.yellow("WARN:"), msg);
+    log(pc.yellow("WARN:"), msg);
     warnCount++;
   };
   const error = (msg: string) => {
-    console.log(pc.red("ERROR:"), msg);
+    log(pc.red("ERROR:"), msg);
     errorCount++;
   };
 
@@ -146,22 +165,22 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
       }
     }
 
-    console.log("");
-    console.log(`Impact of ${pc.cyan(targetId)}:`);
+    log("");
+    log(`Impact of ${pc.cyan(targetId)}:`);
 
     if (impactDocs.length === 0 && impactPacks.length === 0) {
-      console.log("  (no references found)");
+      log("  (no references found)");
     } else {
       if (impactDocs.length > 0) {
-        console.log("  Docs:");
+        log("  Docs:");
         for (const entry of impactDocs) {
-          console.log(`    ${entry.id} ${pc.gray(`(${entry.via})`)}`);
+          log(`    ${entry.id} ${pc.gray(`(${entry.via})`)}`);
         }
       }
       if (impactPacks.length > 0) {
-        console.log("  Packs:");
+        log("  Packs:");
         for (const entry of impactPacks) {
-          console.log(`    ${entry.id} ${pc.gray(`(${entry.via})`)}`);
+          log(`    ${entry.id} ${pc.gray(`(${entry.via})`)}`);
         }
       }
     }
@@ -188,14 +207,14 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
       visited: Set<string>,
     ): void => {
       if (visited.has(evId)) {
-        console.log(`${"  ".repeat(depth + 1)}→ supersedes ${evId} (cycle)`);
+        log(`${"  ".repeat(depth + 1)}→ supersedes ${evId} (cycle)`);
         return;
       }
       visited.add(evId);
       if (depth === 0) {
-        console.log(`  ${evId}`);
+        log(`  ${evId}`);
       } else {
-        console.log(`${"  ".repeat(depth + 1)}→ supersedes ${evId}`);
+        log(`${"  ".repeat(depth + 1)}→ supersedes ${evId}`);
       }
       const node = nodeByEvId.get(evId);
       if (!node) return;
@@ -204,10 +223,10 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
       }
     };
 
-    console.log("");
-    console.log("Supersedes chains:");
+    log("");
+    log("Supersedes chains:");
     if (chainRoots.length === 0) {
-      console.log("  (none)");
+      log("  (none)");
     } else {
       for (const rootId of chainRoots) {
         printChain(rootId, 0, new Set());
@@ -243,13 +262,13 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
       (node) => node.ev_id !== null && !referencedEvIds.has(node.ev_id),
     );
 
-    console.log("");
-    console.log("Orphan nodes (not referenced by any doc or pack):");
+    log("");
+    log("Orphan nodes (not referenced by any doc or pack):");
     if (orphans.length === 0) {
-      console.log("  (none)");
+      log("  (none)");
     } else {
       for (const node of orphans) {
-        console.log(`  ${node.ev_id} ${pc.gray(`(${node.path})`)}`);
+        log(`  ${node.ev_id} ${pc.gray(`(${node.path})`)}`);
       }
     }
   }
@@ -263,22 +282,23 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
           node.supersedes.length > 0),
     );
 
-    console.log("");
-    console.log("Dependency structure:");
+    log("");
+    log("Dependency structure:");
 
     if (nodesWithDeps.length === 0) {
-      console.log("  (none)");
+      log("  (none)");
     } else {
       for (const node of nodesWithDeps) {
-        console.log(`  ${node.ev_id}`);
+        log(`  ${node.ev_id}`);
         for (const id of node.depends_on) {
-          console.log(`    depends_on  → ${id}`);
+          log(`    depends_on  → ${id}`);
         }
         for (const id of node.related) {
-          console.log(`    related     → ${id}`);
+          if (options.activeOnly && supersededBy.has(id)) continue;
+          log(`    related     → ${id}`);
         }
         for (const id of node.supersedes) {
-          console.log(`    supersedes  → ${id}`);
+          log(`    supersedes  → ${id}`);
         }
       }
     }
@@ -295,17 +315,17 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
     const visited = new Set<string>();
     const inStack = new Set<string>();
 
-    const dfs = (id: string, path: string[]): void => {
+    const dfs = (id: string, trail: string[]): void => {
       if (inStack.has(id)) {
-        const cycleStart = path.indexOf(id);
-        cycles.push(path.slice(cycleStart));
+        const cycleStart = trail.indexOf(id);
+        cycles.push(trail.slice(cycleStart));
         return;
       }
       if (visited.has(id)) return;
       visited.add(id);
       inStack.add(id);
       for (const neighbor of adjacency.get(id) ?? []) {
-        dfs(neighbor, [...path, neighbor]);
+        dfs(neighbor, [...trail, neighbor]);
       }
       inStack.delete(id);
     };
@@ -314,21 +334,111 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
       dfs(id, [id]);
     }
 
-    console.log("");
-    console.log("Cycle detection:");
+    log("");
+    log("Cycle detection:");
     if (cycles.length === 0) {
-      console.log("  (no cycles found)");
+      log("  (no cycles found)");
     } else {
       for (const cycle of cycles) {
-        console.log(`  ${pc.red("CYCLE:")} ${cycle.join(" → ")}`);
+        log(`  ${pc.red("CYCLE:")} ${cycle.join(" → ")}`);
       }
     }
   }
 
-  console.log("");
-  console.log(
+  if (options.focus) {
+    const targetId = options.focus;
+    const targetNode = registry.nodes.find((n) => n.ev_id === targetId);
+
+    log("");
+    log(`Focus: ${targetId}`);
+
+    if (!targetNode) {
+      log(`  (not found in registry)`);
+    } else {
+      type ImpactEntry = { id: string; via: string };
+      const focusImpactDocs: ImpactEntry[] = [];
+      const focusImpactPacks: ImpactEntry[] = [];
+
+      for (const node of registry.nodes) {
+        const source = node.ev_id ?? node.path;
+        if (node.depends_on.includes(targetId))
+          focusImpactDocs.push({ id: source, via: "depends_on" });
+        if (node.related.includes(targetId))
+          focusImpactDocs.push({ id: source, via: "related" });
+        if (node.supersedes.includes(targetId))
+          focusImpactDocs.push({ id: source, via: "supersedes" });
+      }
+      for (const packId of packIds) {
+        try {
+          const pack = await readPackConfig(root, packId);
+          if (pack.mustRead.includes(targetId))
+            focusImpactPacks.push({ id: pack.id, via: "mustRead" });
+        } catch {
+          // 無視
+        }
+      }
+
+      log("  Referenced by:");
+      if (focusImpactDocs.length === 0 && focusImpactPacks.length === 0) {
+        log("    (none)");
+      } else {
+        for (const e of focusImpactDocs) log(`    ${e.id} (${e.via})`);
+        for (const e of focusImpactPacks) log(`    ${e.id} (${e.via})`);
+      }
+
+      log("  Dependencies:");
+      if (
+        targetNode.depends_on.length === 0 &&
+        targetNode.related.length === 0 &&
+        targetNode.supersedes.length === 0
+      ) {
+        log("    (none)");
+      } else {
+        for (const id of targetNode.depends_on)
+          log(`    depends_on  → ${id}`);
+        for (const id of targetNode.related)
+          log(`    related     → ${id}`);
+        for (const id of targetNode.supersedes)
+          log(`    supersedes  → ${id}`);
+      }
+    }
+  }
+
+  if (options.focusDir) {
+    const dirPrefix = options.focusDir
+      .replace(/\\/g, "/")
+      .replace(/\/?$/, "/");
+    const targetNodes = registry.nodes.filter(
+      (n) =>
+        n.ev_id !== null &&
+        n.path.replace(/\\/g, "/").startsWith(dirPrefix),
+    );
+
+    log("");
+    log(`Focus dir: ${options.focusDir} (${targetNodes.length} nodes)`);
+
+    for (const targetNode of targetNodes) {
+      log(`  ${targetNode.ev_id}`);
+      for (const id of targetNode.depends_on)
+        log(`    depends_on  → ${id}`);
+      for (const id of targetNode.related)
+        log(`    related     → ${id}`);
+      for (const id of targetNode.supersedes)
+        log(`    supersedes  → ${id}`);
+    }
+  }
+
+  log("");
+  log(
     `Validation complete: ${pc.red(`${errorCount} error(s)`)}, ${pc.yellow(`${warnCount} warning(s)`)}`,
   );
+
+  if (options.output) {
+    const outputPath = path.resolve(options.output);
+    await mkdir(path.dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, outputLines.join("\n") + "\n", "utf8");
+    console.log(pc.green("✔"), `validate output saved → ${outputPath}`);
+  }
 
   if (options.strict && errorCount > 0) {
     process.exit(1);
