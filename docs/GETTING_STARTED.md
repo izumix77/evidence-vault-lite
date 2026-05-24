@@ -366,6 +366,7 @@ and uses the `mustRead` content as structured context.
 | `evlite pack <pack-id>` | Generate `pack.md` from `pack.json` |
 | `evlite init-meta <file>` | Insert frontmatter block |
 | `evlite validate` | Check dependency and reference integrity |
+| `evlite report <name>` | Generate an EVReport scaffold |
 | `evlite ui` | Launch local UI → `localhost:3137` |
 
 ### snapshot options
@@ -377,6 +378,41 @@ and uses the `mustRead` content as structured context.
 | `--include <glob>` | File patterns to include (repeatable) |
 | `--exclude <glob>` | File patterns to exclude (repeatable) |
 | `--no-content` | Tree only, no file contents |
+
+### validate options
+
+| Option | Description |
+|---|---|
+| `--strict` | Exit 1 if any ERROR is found |
+| `--show-chains` | Print supersedes chains |
+| `--show-impact <ev_id>` | Show all docs and packs referencing the given ev_id |
+| `--show-orphans` | List nodes not referenced by any doc or pack |
+| `--show-depends` | Show depends_on / related / supersedes structure |
+| `--show-cycles` | Detect circular dependencies |
+| `--active-only` | With `--show-depends`: skip superseded related nodes |
+| `--focus <ev_id>` | Show all info for the specified ev_id |
+| `--focus-dir <path>` | Show all info for nodes in the specified directory |
+| `--output <path>` | Save validate output to a file |
+
+### report options
+
+| Option | Description |
+|---|---|
+| `--kind <kind>` | Report kind: `implementation` / `analysis` / `architecture` / `research` / `incident` / `observer` / `retrospective` (default: `implementation`) |
+| `--stack <stack>` | Stack value for frontmatter (default: `docs`) |
+| `--output <path>` | Output file path (default: `artifacts/reports/<name>.report.md`) |
+
+### ui options
+
+| Option | Description |
+|---|---|
+| `--root <path>` | Root directory to serve |
+| `--port <port>` | Port number (default: `3137`) |
+
+> You can also set a default port per repo via `.ev-lite/settings.json`:
+> ```json
+> { "port": 3138, "description": "my-repo — reference UI" }
+> ```
 
 ---
 

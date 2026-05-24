@@ -366,6 +366,7 @@ AI は `goal` / `outputGoal` / `doNotInfer` を指示として読み、
 | `evlite pack <pack-id>` | `pack.json` から `pack.md` 生成 |
 | `evlite init-meta <file>` | frontmatter ブロックを挿入 |
 | `evlite validate` | 依存関係・参照の整合性チェック |
+| `evlite report <name>` | EVReport のスキャフォールドを生成 |
 | `evlite ui` | ローカル UI 起動 → `localhost:3137` |
 
 ### snapshot オプション
@@ -377,6 +378,41 @@ AI は `goal` / `outputGoal` / `doNotInfer` を指示として読み、
 | `--include <glob>` | 対象ファイルパターン（複数指定可） |
 | `--exclude <glob>` | 除外パターン（複数指定可） |
 | `--no-content` | tree のみ（コード内容を含めない） |
+
+### validate オプション
+
+| オプション | 説明 |
+|---|---|
+| `--strict` | ERROR があれば exit 1 |
+| `--show-chains` | supersedes チェーンを表示 |
+| `--show-impact <ev_id>` | 指定 ev_id を参照している docs/packs を逆引き |
+| `--show-orphans` | どの doc/pack からも参照されていない node を一覧 |
+| `--show-depends` | depends_on / related / supersedes の構造を表示 |
+| `--show-cycles` | 循環依存を検出 |
+| `--active-only` | `--show-depends` と併用: superseded な related をスキップ |
+| `--focus <ev_id>` | 指定 ev_id の全情報を一括表示 |
+| `--focus-dir <path>` | 指定フォルダ内の全 node 情報を一括表示 |
+| `--output <path>` | validate の出力をファイルに保存 |
+
+### report オプション
+
+| オプション | 説明 |
+|---|---|
+| `--kind <kind>` | レポート種別: `implementation` / `analysis` / `architecture` / `research` / `incident` / `observer` / `retrospective`（デフォルト: `implementation`） |
+| `--stack <stack>` | frontmatter の stack 値（デフォルト: `docs`） |
+| `--output <path>` | 出力ファイルパス（デフォルト: `artifacts/reports/<name>.report.md`） |
+
+### ui オプション
+
+| オプション | 説明 |
+|---|---|
+| `--root <path>` | 対象ディレクトリ |
+| `--port <port>` | ポート番号（デフォルト: `3137`） |
+
+> repo ごとにデフォルトポートを設定する場合は `.ev-lite/settings.json` を作成：
+> ```json
+> { "port": 3138, "description": "my-repo — 参照用 UI" }
+> ```
 
 ---
 

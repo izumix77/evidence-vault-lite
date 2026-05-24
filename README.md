@@ -128,18 +128,23 @@ supersedes: []
 | `evlite pack <pack-id>` | generate `pack.md` from `pack.json` |
 | `evlite init-meta <file>` | insert frontmatter block |
 | `evlite validate` | check dependency and topology integrity |
+| `evlite report <name>` | generate an EVReport scaffold |
 | `evlite ui` | launch local UI → `localhost:3137` |
 
 ### validate options
 
 | Option | Description |
 |---|---|
+| `--strict` | exit 1 if any ERROR is found |
 | `--show-chains` | display supersedes chains derived from topology |
-| `--show-impact <ev_id>` | show all docs / packs impacted by this node *(Phase 4)* |
-| `--show-orphans` | show unreferenced nodes *(Phase 4)* |
-| `--show-depends` | display depends_on / related graph *(Phase 4)* |
-| `--show-cycles` | detect circular dependencies *(Phase 4)* |
-| `--strict` | exit 1 on errors |
+| `--show-impact <ev_id>` | show all docs and packs referencing the given ev_id |
+| `--show-orphans` | list nodes not referenced by any doc or pack |
+| `--show-depends` | show depends_on / related / supersedes structure |
+| `--show-cycles` | detect circular dependencies |
+| `--active-only` | with `--show-depends`: skip superseded related nodes |
+| `--focus <ev_id>` | show all info for the specified ev_id |
+| `--focus-dir <path>` | show all info for nodes in the specified directory |
+| `--output <path>` | save validate output to a file |
 
 ### snapshot options
 
@@ -150,6 +155,26 @@ supersedes: []
 | `--include <glob>` | file patterns to include (repeatable) |
 | `--exclude <glob>` | file patterns to exclude (repeatable) |
 | `--no-content` | tree only, no file contents |
+
+### report options
+
+| Option | Description |
+|---|---|
+| `--kind <kind>` | report kind: `implementation` / `analysis` / `architecture` / `research` / `incident` / `observer` / `retrospective` (default: `implementation`) |
+| `--stack <stack>` | frontmatter stack value (default: `docs`) |
+| `--output <path>` | output file path (default: `artifacts/reports/<name>.report.md`) |
+
+### ui options
+
+| Option | Description |
+|---|---|
+| `--root <path>` | root directory to serve |
+| `--port <port>` | port number (default: `3137`) |
+
+> You can also set a default port per repo via `.ev-lite/settings.json`:
+> ```json
+> { "port": 3138, "description": "my-repo — reference UI" }
+> ```
 
 ## Snapshot Semantics
 
