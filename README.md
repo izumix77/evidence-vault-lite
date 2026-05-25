@@ -23,6 +23,7 @@ Document Context Routing System.
 - `registry.json` generation
 - Context Pack generation (`pack.md`)
 - Code snapshot generation (`snapshot.md`)
+- Dependency-aware snapshot (`--deps`): traces static imports from an entrypoint
 - Markdown bundle output for AI tools
 - YAML frontmatter metadata support
 - Local web UI for metadata editing and pack building
@@ -97,8 +98,11 @@ evlite scan
 # 2. open UI → add frontmatter to key documents
 evlite ui
 
-# 3. snapshot your code as context
+# 3a. snapshot a directory as context
 evlite snapshot packages/core/src --stack my-stack
+
+# 3b. snapshot by dependency graph (traces imports from entrypoint)
+evlite snapshot packages/core/src/index.ts --deps --stack my-stack
 
 # 4. create a Context Pack
 evlite pack my-pack
@@ -156,6 +160,10 @@ supersedes: []
 | `--include <glob>` | file patterns to include (repeatable) |
 | `--exclude <glob>` | file patterns to exclude (repeatable) |
 | `--no-content` | tree only, no file contents |
+| `--deps` | trace import/export dependencies from entrypoint |
+| `--max-depth <n>` | max traversal depth (default: `10`) |
+| `--include-tests` | include `.spec.ts` / `.test.ts` files |
+| `--no-dep-tree` | omit dependency tree section from output |
 
 ### report options
 
@@ -183,6 +191,10 @@ supersedes: []
 snapshot is not source of truth.
 source files are canonical.
 snapshot is an AI transfer artifact.
+
+deps mode is a reachability snapshot, not a glob snapshot.
+Only files reachable from the entrypoint through supported static relative imports are included.
+Skipped imports MUST be reported, not silently ignored.
 ```
 
 ## License

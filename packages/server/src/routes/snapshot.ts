@@ -10,6 +10,10 @@ type SnapshotRequestBody = {
   include?: string[];
   exclude?: string[];
   noContent?: boolean;
+  deps?: boolean;
+  maxDepth?: number;
+  includeTests?: boolean;
+  noDepTree?: boolean;
 };
 
 export function registerSnapshotRoutes(
@@ -32,6 +36,10 @@ export function registerSnapshotRoutes(
       include: body.include,
       exclude: body.exclude,
       noContent: body.noContent,
+      deps: body.deps,
+      maxDepth: body.maxDepth,
+      includeTests: body.includeTests,
+      noDepTree: body.noDepTree,
     });
     return c.json(meta);
   });

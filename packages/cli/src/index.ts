@@ -134,6 +134,14 @@ program
     [] as string[],
   )
   .option("--no-content", "tree only (omit file content)")
+  .option("--deps", "trace import/export dependencies from entrypoint")
+  .option(
+    "--max-depth <n>",
+    "max traversal depth (default: 10)",
+    (v: string) => Number.parseInt(v, 10),
+  )
+  .option("--include-tests", "include .spec.ts / .test.ts files")
+  .option("--no-dep-tree", "omit dependency tree section from snapshot.md")
   .action(
     async (
       inputPath: string,
@@ -144,6 +152,10 @@ program
         include: string[];
         exclude: string[];
         content?: boolean;
+        deps?: boolean;
+        maxDepth?: number;
+        includeTests?: boolean;
+        depTree?: boolean;
       },
     ) => {
       await runSnapshot(inputPath, {
@@ -153,6 +165,10 @@ program
         include: opts.include,
         exclude: opts.exclude,
         noContent: opts.content === false,
+        deps: opts.deps,
+        maxDepth: opts.maxDepth,
+        includeTests: opts.includeTests,
+        noDepTree: opts.depTree === false,
       });
     },
   );

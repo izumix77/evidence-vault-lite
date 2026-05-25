@@ -275,6 +275,35 @@ snapshot 生成後は `evlite scan` で registry に登録します：
 evlite scan
 ```
 
+### 依存追跡モード：import グラフで snapshot する
+
+エントリーポイントから実際に到達できるファイルだけを snapshot するには `--deps` を使います：
+
+```bash
+evlite snapshot packages/core/src/index.ts --deps --stack dgc
+```
+
+出力例：
+```
+✔ Resolved 12 files (17 edges)
+✔ Skipped 31 imports
+✔ snapshot.md generated → .ev-lite/snapshots/index.md
+✔ ev_id: ev:dgc.snapshot-index
+```
+
+生成される snapshot.md には以下の3セクションが追加されます：
+
+- **Dependency Scope** — サマリーテーブル（ファイル数・エッジ数・スキップ数）
+- **Dependency Tree** — import グラフのビジュアルツリー（共有依存は `(visited)` でマーク）
+- **Skipped Imports** — 追跡しなかった import の一覧と理由（`external` / `alias` / `missing` など）
+
+このモードは**静的な相対 import**（`./` と `../`）のみを追跡します。
+`node_modules` やワークスペースエイリアス（例: `@ev-lite/shared`）はスキップとして記録されます（サイレントに無視されません）。
+
+> **`--deps` とディレクトリ snapshot の使い分け：**
+> - ディレクトリ snapshot：フォルダ内のファイルをまとめて渡したい
+> - `--deps`：エントリーポイントが実際に使っているファイルだけを渡したい
+
 ---
 
 ## Step 7: Context Pack を作る
@@ -381,6 +410,10 @@ AI は `goal` / `outputGoal` / `doNotInfer` を指示として読み、
 | `--include <glob>` | 対象ファイルパターン（複数指定可） |
 | `--exclude <glob>` | 除外パターン（複数指定可） |
 | `--no-content` | tree のみ（コード内容を含めない） |
+| `--deps` | エントリーポイントから import/export 依存を追跡 |
+| `--max-depth <n>` | 最大追跡深度（デフォルト: `10`） |
+| `--include-tests` | `.spec.ts` / `.test.ts` を追跡対象に含める |
+| `--no-dep-tree` | Dependency Tree セクションを省略 |
 
 ### validate オプション
 

@@ -369,6 +369,7 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 | 🟡 P9-d | Metadata Editor DerivedTag バッジ | ui | S |
 | 🟡 P9-e | `GET /api/dirs` + Directory Browser UI | server / ui | M |
 | ⬜ — | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
+| ✅ | snapshot --deps（依存追跡モード） | shared / core / cli / ui / server | M |
 
 ---
 
@@ -388,3 +389,47 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 _EVLite — 機能追加 & TODO（確定版）_
 _Constitution v0.5 基準_
 _作成: 2026-05-21_
+
+---
+
+## 8. 実装済み追加機能
+
+### 8-A. evlite snapshot --deps ✅
+
+**実装日:** 2026-05-26
+
+エントリーポイントから静的 import/export を再帰的に追跡し、
+到達可能なファイルのみを snapshot する依存追跡モード。
+
+```
+deps mode is a reachability snapshot, not a glob snapshot.
+Only files reachable from the entrypoint through supported static relative imports are included.
+Skipped imports MUST be reported, not silently ignored.
+```
+
+**追加ファイル:**
+- `packages/shared/src/deps.ts` — `DepGraph` / `DepSkip` / `DepSkipReason` 型
+- `packages/core/src/deps.ts` — `resolveDeps()` / `renderDepTree()` / `renderSkippedTable()`
+- `packages/core/src/__tests__/deps.test.ts` — 9 tests all green
+
+**修正ファイル:**
+- `packages/core/src/snapshot.ts` — deps モード分岐（glob path 無変更）
+- `packages/cli/src/commands/snapshot.ts` — `--deps` / `--max-depth` / `--include-tests` / `--no-dep-tree`
+- `packages/server/src/routes/snapshot.ts` — 4 フィールド追加（explicit destructure のため）
+- `apps/evlite-ui/src/types.ts` — `SnapshotInput` / `SnapshotResult` 拡張
+- `apps/evlite-ui/src/components/SnapshotBuilder.tsx` — deps モード UI
+
+**使用例:**
+```powershell
+evlite snapshot packages/core/src/index.ts --deps --stack evlite
+evlite snapshot packages/core/src/index.ts --deps --max-depth 5
+evlite snapshot packages/core/src/index.ts --deps --no-content
+```
+
+**既知の out-of-scope（v0.1）:**
+- side-effect import（`import "./polyfill"` 形式）
+- `require()` CommonJS
+- `tsconfig.paths` エイリアス解決
+
+**v0.1.1 修正:** `.js` 拡張子付き specifier（TypeScript ESM の `export * from "./scan.js"` 形式）が
+実在する `.ts` ファイルに解決されない不具合を修正。`resolveSpecifier()` に `.js` → `.ts/.tsx` fallback を追加。

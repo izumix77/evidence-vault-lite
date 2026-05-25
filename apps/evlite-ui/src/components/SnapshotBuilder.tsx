@@ -24,6 +24,10 @@ type FormState = {
   include: string[];
   exclude: string[];
   noContent: boolean;
+  deps: boolean;
+  maxDepth: string;
+  includeTests: boolean;
+  noDepTree: boolean;
 };
 
 const EMPTY_FORM: FormState = {
@@ -33,6 +37,10 @@ const EMPTY_FORM: FormState = {
   include: [],
   exclude: [],
   noContent: false,
+  deps: false,
+  maxDepth: "10",
+  includeTests: false,
+  noDepTree: false,
 };
 
 function nonEmpty(values: string[]): string[] | undefined {
@@ -127,9 +135,14 @@ export function SnapshotBuilder({ onRegistryUpdate }: Props) {
         path: form.path.trim(),
         stack: form.stack.trim() || undefined,
         title: form.title.trim() || undefined,
-        include: nonEmpty(form.include),
-        exclude: nonEmpty(form.exclude),
+        include: form.deps ? undefined : nonEmpty(form.include),
+        exclude: form.deps ? undefined : nonEmpty(form.exclude),
         noContent: form.noContent || undefined,
+        deps: form.deps || undefined,
+        maxDepth:
+          form.deps && form.maxDepth ? parseInt(form.maxDepth, 10) : undefined,
+        includeTests: form.deps && form.includeTests ? true : undefined,
+        noDepTree: form.deps && form.noDepTree ? true : undefined,
       });
       setResult(meta);
       try {
@@ -225,19 +238,74 @@ export function SnapshotBuilder({ onRegistryUpdate }: Props) {
         />
       </div>
 
-      <StringListEditor
-        label="include"
-        values={form.include}
-        onChange={(v) => updateField("include", v)}
-        placeholder="**/*.ts"
-      />
+      <div className="form-row form-row-checkbox">
+        <label>deps</label>
+        <label className="checkbox-cell">
+          <input
+            type="checkbox"
+            checked={form.deps}
+            onChange={(e) => updateField("deps", e.target.checked)}
+          />
+          <span>dependency mode (--deps; entrypoint must be a file)</span>
+        </label>
+      </div>
 
-      <StringListEditor
-        label="exclude"
-        values={form.exclude}
-        onChange={(v) => updateField("exclude", v)}
-        placeholder="**/*.spec.ts"
-      />
+      {form.deps && (
+        <>
+          <div className="form-row">
+            <label>max depth</label>
+            <input
+              type="number"
+              min={1}
+              value={form.maxDepth}
+              onChange={(e) => updateField("maxDepth", e.target.value)}
+              placeholder="10"
+            />
+          </div>
+          <div className="form-row form-row-checkbox">
+            <label>include tests</label>
+            <label className="checkbox-cell">
+              <input
+                type="checkbox"
+                checked={form.includeTests}
+                onChange={(e) =>
+                  updateField("includeTests", e.target.checked)
+                }
+              />
+              <span>follow .spec.ts / .test.ts</span>
+            </label>
+          </div>
+          <div className="form-row form-row-checkbox">
+            <label>no dep tree</label>
+            <label className="checkbox-cell">
+              <input
+                type="checkbox"
+                checked={form.noDepTree}
+                onChange={(e) => updateField("noDepTree", e.target.checked)}
+              />
+              <span>omit Dependency Tree section</span>
+            </label>
+          </div>
+        </>
+      )}
+
+      {!form.deps && (
+        <>
+          <StringListEditor
+            label="include"
+            values={form.include}
+            onChange={(v) => updateField("include", v)}
+            placeholder="**/*.ts"
+          />
+
+          <StringListEditor
+            label="exclude"
+            values={form.exclude}
+            onChange={(v) => updateField("exclude", v)}
+            placeholder="**/*.spec.ts"
+          />
+        </>
+      )}
 
       <div className="form-row form-row-checkbox">
         <label>no-content</label>
@@ -277,6 +345,18 @@ export function SnapshotBuilder({ onRegistryUpdate }: Props) {
             <span className="snapshot-result-label">files</span>
             <code>{result.fileCount}</code>
           </div>
+          {result.depGraph && (
+            <>
+              <div className="snapshot-result-line">
+                <span className="snapshot-result-label">edges</span>
+                <code>{result.depGraph.edges}</code>
+              </div>
+              <div className="snapshot-result-line">
+                <span className="snapshot-result-label">skipped</span>
+                <code>{result.depGraph.skipped}</code>
+              </div>
+            </>
+          )}
           {registryUpdated && (
             <div className="snapshot-result-line">
               <span className="saved-msg">✔ registry updated</span>

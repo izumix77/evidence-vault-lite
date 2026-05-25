@@ -1,8 +1,11 @@
 import path from "node:path";
 import fs from "fs-extra";
 import fg from "fast-glob";
+import type { DepGraph } from "@ev-lite/shared";
+import { resolveDeps, renderDepTree, renderSkippedTable } from "./deps.js";
 
 const SNAPSHOT_VERSION = "0.1.0";
+const DEFAULT_DEPS_MAX_DEPTH = 10;
 
 const DEFAULT_INCLUDE: string[] = [
   "**/*.ts",
@@ -55,12 +58,20 @@ export type SnapshotOptions = {
   include?: string[];
   exclude?: string[];
   noContent?: boolean;
+  deps?: boolean;
+  maxDepth?: number;
+  includeTests?: boolean;
+  noDepTree?: boolean;
 };
 
 export type SnapshotMeta = {
   evId: string;
   output: string;
   fileCount: number;
+  depGraph?: {
+    edges: number;
+    skipped: number;
+  };
 };
 
 function toPosix(p: string): string {
@@ -264,6 +275,10 @@ async function assembleSnapshot(ctx: ResolvedContext, noContent: boolean): Promi
 }
 
 export async function buildSnapshot(options: SnapshotOptions): Promise<string> {
+  if (options.deps) {
+    const result = await assembleDepsSnapshot(options);
+    return result.markdown;
+  }
   const ctx = resolveContext(options);
   const result = await assembleSnapshot(ctx, options.noContent ?? false);
   return result.markdown;
@@ -272,6 +287,21 @@ export async function buildSnapshot(options: SnapshotOptions): Promise<string> {
 export async function generateSnapshot(
   options: SnapshotOptions,
 ): Promise<SnapshotMeta> {
+  if (options.deps) {
+    const result = await assembleDepsSnapshot(options);
+    await fs.ensureDir(path.dirname(result.output));
+    await fs.writeFile(result.output, result.markdown, "utf8");
+    return {
+      evId: result.evId,
+      output: result.output,
+      fileCount: result.files.length,
+      depGraph: {
+        edges: result.graph.edges.length,
+        skipped: result.graph.skipped.length,
+      },
+    };
+  }
+
   const ctx = resolveContext(options);
   const result = await assembleSnapshot(ctx, options.noContent ?? false);
 
@@ -282,5 +312,134 @@ export async function generateSnapshot(
     evId: ctx.evId,
     output: ctx.output,
     fileCount: result.files.length,
+  };
+}
+
+type DepsContext = {
+  absolutePath: string;
+  basename: string;
+  baseNoExt: string;
+  stack: string;
+  evId: string;
+  sourcePath: string;
+  title: string;
+  output: string;
+  maxDepth: number;
+  includeTests: boolean;
+  noDepTree: boolean;
+  noContent: boolean;
+};
+
+function resolveDepsContext(options: SnapshotOptions): DepsContext {
+  const absolutePath = path.isAbsolute(options.path)
+    ? options.path
+    : path.resolve(options.root, options.path);
+  const basename = path.basename(absolutePath);
+  const baseNoExt = basename.replace(/\.[^.]+$/, "");
+  const stack = options.stack ?? baseNoExt;
+  const evId = `ev:${stack}.snapshot-${baseNoExt}`;
+  const sourcePath = toPosix(path.relative(options.root, absolutePath)) || ".";
+  const title = options.title ?? `Snapshot: ${sourcePath}`;
+  const output =
+    options.output ??
+    path.join(options.root, ".ev-lite", "snapshots", `${baseNoExt}.md`);
+
+  return {
+    absolutePath,
+    basename,
+    baseNoExt,
+    stack,
+    evId,
+    sourcePath,
+    title,
+    output,
+    maxDepth: options.maxDepth ?? DEFAULT_DEPS_MAX_DEPTH,
+    includeTests: options.includeTests ?? false,
+    noDepTree: options.noDepTree ?? false,
+    noContent: options.noContent ?? false,
+  };
+}
+
+function buildDepsScopeSection(ctx: DepsContext, graph: DepGraph): string {
+  return [
+    "## Dependency Scope",
+    "",
+    "| Key | Value |",
+    "|-----|-------|",
+    "| mode | deps |",
+    `| entrypoint | ${graph.entrypoint} |`,
+    `| files | ${graph.files.length} |`,
+    `| edges | ${graph.edges.length} |`,
+    `| maxDepth | ${ctx.maxDepth} |`,
+    `| skipped | ${graph.skipped.length} |`,
+  ].join("\n");
+}
+
+function buildDepTreeSection(graph: DepGraph): string {
+  return ["## Dependency Tree", "", "```", renderDepTree(graph), "```"].join(
+    "\n",
+  );
+}
+
+function buildSkippedSection(graph: DepGraph): string {
+  return ["## Skipped Imports", "", renderSkippedTable(graph)].join("\n");
+}
+
+async function assembleDepsSnapshot(options: SnapshotOptions): Promise<{
+  markdown: string;
+  files: string[];
+  graph: DepGraph;
+  evId: string;
+  output: string;
+}> {
+  const ctx = resolveDepsContext(options);
+
+  if (!(await fs.pathExists(ctx.absolutePath))) {
+    throw new Error(`Entrypoint not found: ${ctx.sourcePath}`);
+  }
+  const stat = await fs.stat(ctx.absolutePath);
+  if (!stat.isFile()) {
+    throw new Error(
+      `--deps requires a file entrypoint, got directory: ${ctx.sourcePath}`,
+    );
+  }
+
+  const graph = await resolveDeps(ctx.sourcePath, options.root, {
+    maxDepth: ctx.maxDepth,
+    includeTests: ctx.includeTests,
+  });
+
+  const filePaths = graph.files;
+  const treePaths = filePaths.map((p) => p);
+
+  const sections: string[] = [
+    buildFrontmatter(ctx.evId, ctx.stack),
+    buildHeader(ctx.title, ctx.sourcePath),
+    buildDepsScopeSection(ctx, graph),
+  ];
+
+  if (!ctx.noDepTree) {
+    sections.push(buildDepTreeSection(graph));
+  }
+
+  sections.push(buildSkippedSection(graph));
+  sections.push(buildTreeSection(renderTree(treePaths)));
+  sections.push("---");
+
+  if (!ctx.noContent) {
+    for (const relPath of filePaths) {
+      const absoluteFilePath = path.resolve(options.root, relPath);
+      const content = await fs.readFile(absoluteFilePath, "utf8");
+      sections.push(buildFileSection(relPath, content));
+      sections.push("---");
+    }
+  }
+
+  return {
+    markdown: sections.join("\n\n") + "\n",
+    files: filePaths,
+    graph,
+    evId: ctx.evId,
+    output: ctx.output,
   };
 }

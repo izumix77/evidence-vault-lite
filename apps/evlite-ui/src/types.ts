@@ -59,10 +59,18 @@ export type SnapshotInput = {
   include?: string[];
   exclude?: string[];
   noContent?: boolean;
+  deps?: boolean;
+  maxDepth?: number;
+  includeTests?: boolean;
+  noDepTree?: boolean;
 };
 
 export type SnapshotResult = {
   evId: string;
   output: string;
   fileCount: number;
+  depGraph?: {
+    edges: number;
+    skipped: number;
+  };
 };

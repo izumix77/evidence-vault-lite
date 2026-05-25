@@ -274,6 +274,35 @@ After generating a snapshot, update the registry:
 evlite scan
 ```
 
+### Dependency mode: snapshot by import graph
+
+To snapshot only the files actually reachable from an entrypoint, use `--deps`:
+
+```bash
+evlite snapshot packages/core/src/index.ts --deps --stack dgc
+```
+
+Example output:
+```
+✔ Resolved 12 files (17 edges)
+✔ Skipped 31 imports
+✔ snapshot.md generated → .ev-lite/snapshots/index.md
+✔ ev_id: ev:dgc.snapshot-index
+```
+
+The generated snapshot includes three additional sections:
+
+- **Dependency Scope** — summary table (files, edges, skipped count)
+- **Dependency Tree** — visual tree of the import graph with `(visited)` markers for shared deps
+- **Skipped Imports** — table of imports that were not followed, with reasons (`external`, `alias`, `missing`, etc.)
+
+This mode traces only **static relative imports** (`./` and `../`).
+`node_modules` and workspace aliases (e.g. `@ev-lite/shared`) are listed as skipped — not silently dropped.
+
+> **When to use `--deps` vs directory snapshot:**
+> - Directory snapshot: you want everything in a folder
+> - `--deps`: you want only what your entrypoint actually uses
+
 ---
 
 ## Step 7: Create a Context Pack
@@ -380,6 +409,10 @@ and uses the `mustRead` content as structured context.
 | `--include <glob>` | File patterns to include (repeatable) |
 | `--exclude <glob>` | File patterns to exclude (repeatable) |
 | `--no-content` | Tree only, no file contents |
+| `--deps` | Trace import/export dependencies from entrypoint |
+| `--max-depth <n>` | Max traversal depth (default: `10`) |
+| `--include-tests` | Include `.spec.ts` / `.test.ts` files |
+| `--no-dep-tree` | Omit dependency tree section from output |
 
 ### validate options
 
