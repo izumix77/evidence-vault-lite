@@ -303,6 +303,35 @@ This mode traces only **static relative imports** (`./` and `../`).
 > - Directory snapshot: you want everything in a folder
 > - `--deps`: you want only what your entrypoint actually uses
 
+### Agent context compilation
+
+To generate both a dependency snapshot and a pack in one command:
+
+```bash
+evlite context packages/core/src/index.ts --goal "implement --output option" --stack evlite
+```
+
+Example output:
+```
+✔ snapshot.md generated  → .ev-lite/snapshots/index.md
+✔ ev_id                  → ev:evlite.snapshot-index
+✔ pack.json saved        → .ev-lite/packs/context-index-20260527T103000.json
+✔ pack.md generated      → .ev-lite/packs/context-index-20260527T103000.md
+✔ pack_id                → pack:context-index-20260527T103000
+```
+
+To preview without writing files:
+
+```bash
+evlite context packages/core/src/index.ts --goal "..." --dry-run
+```
+
+To find which snapshots and packs are affected by a file change:
+
+```bash
+evlite validate --affected packages/core/src/snapshot.ts
+```
+
 ---
 
 ## Step 7: Create a Context Pack
@@ -397,6 +426,7 @@ and uses the `mustRead` content as structured context.
 | `evlite pack <pack-id>` | Generate `pack.md` from `pack.json` |
 | `evlite init-meta <file>` | Insert frontmatter block |
 | `evlite validate` | Check dependency and reference integrity |
+| `evlite context <entrypoint>` | Compile agent context: deps snapshot + pack in one command |
 | `evlite report <name>` | Generate an EVReport scaffold |
 | `evlite ui` | Launch local UI → `localhost:3137` |
 
@@ -413,6 +443,8 @@ and uses the `mustRead` content as structured context.
 | `--max-depth <n>` | Max traversal depth (default: `10`) |
 | `--include-tests` | Include `.spec.ts` / `.test.ts` files |
 | `--no-dep-tree` | Omit dependency tree section from output |
+| `--dry-run` | Resolve dependency graph without writing snapshot.md |
+| `--json` | Print DepGraph as JSON to stdout (machine-readable contract) |
 
 ### validate options
 
@@ -428,6 +460,8 @@ and uses the `mustRead` content as structured context.
 | `--focus <ev_id>` | Show all info for the specified ev_id |
 | `--focus-dir <path>` | Show all info for nodes in the specified directory |
 | `--output <path>` | Save validate output to a file |
+| `--affected <file>` | Find snapshots and packs affected by a source file change |
+| `--json` | Output `--affected` result as JSON (use with `--affected`) |
 
 ### report options
 

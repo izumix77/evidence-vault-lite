@@ -304,6 +304,35 @@ evlite snapshot packages/core/src/index.ts --deps --stack dgc
 > - ディレクトリ snapshot：フォルダ内のファイルをまとめて渡したい
 > - `--deps`：エントリーポイントが実際に使っているファイルだけを渡したい
 
+### Agent コンテキストのコンパイル
+
+dependency snapshot と pack を1コマンドで生成するには：
+
+```bash
+evlite context packages/core/src/index.ts --goal "implement --output option" --stack evlite
+```
+
+出力例：
+```
+✔ snapshot.md generated  → .ev-lite/snapshots/index.md
+✔ ev_id                  → ev:evlite.snapshot-index
+✔ pack.json saved        → .ev-lite/packs/context-index-20260527T103000.json
+✔ pack.md generated      → .ev-lite/packs/context-index-20260527T103000.md
+✔ pack_id                → pack:context-index-20260527T103000
+```
+
+ファイルを書かずに内容を確認するには：
+
+```bash
+evlite context packages/core/src/index.ts --goal "..." --dry-run
+```
+
+ファイル変更による影響範囲を調べるには：
+
+```bash
+evlite validate --affected packages/core/src/snapshot.ts
+```
+
 ---
 
 ## Step 7: Context Pack を作る
@@ -398,6 +427,7 @@ AI は `goal` / `outputGoal` / `doNotInfer` を指示として読み、
 | `evlite pack <pack-id>` | `pack.json` から `pack.md` 生成 |
 | `evlite init-meta <file>` | frontmatter ブロックを挿入 |
 | `evlite validate` | 依存関係・参照の整合性チェック |
+| `evlite context <entrypoint>` | Agent コンテキストをコンパイル: deps snapshot + pack を1コマンドで生成 |
 | `evlite report <name>` | EVReport のスキャフォールドを生成 |
 | `evlite ui` | ローカル UI 起動 → `localhost:3137` |
 
@@ -414,6 +444,8 @@ AI は `goal` / `outputGoal` / `doNotInfer` を指示として読み、
 | `--max-depth <n>` | 最大追跡深度（デフォルト: `10`） |
 | `--include-tests` | `.spec.ts` / `.test.ts` を追跡対象に含める |
 | `--no-dep-tree` | Dependency Tree セクションを省略 |
+| `--dry-run` | snapshot.md を書かずに依存グラフを解決して表示 |
+| `--json` | DepGraph を JSON で stdout に出力（machine-readable contract） |
 
 ### validate オプション
 
@@ -429,6 +461,8 @@ AI は `goal` / `outputGoal` / `doNotInfer` を指示として読み、
 | `--focus <ev_id>` | 指定 ev_id の全情報を一括表示 |
 | `--focus-dir <path>` | 指定フォルダ内の全 node 情報を一括表示 |
 | `--output <path>` | validate の出力をファイルに保存 |
+| `--affected <file>` | source file の変更で影響を受ける snapshot / pack を逆引き |
+| `--json` | `--affected` の結果を JSON で出力（`--affected` と併用） |
 
 ### report オプション
 

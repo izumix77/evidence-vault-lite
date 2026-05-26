@@ -433,3 +433,68 @@ evlite snapshot packages/core/src/index.ts --deps --no-content
 
 **v0.1.1 修正:** `.js` 拡張子付き specifier（TypeScript ESM の `export * from "./scan.js"` 形式）が
 実在する `.ts` ファイルに解決されない不具合を修正。`resolveSpecifier()` に `.js` → `.ts/.tsx` fallback を追加。
+
+### 8-B. evlite snapshot --deps --dry-run / --json ✅ (Phase D1)
+
+**実装日:** 2026-05-27
+
+dependency snapshot の machine-readable 出力モードを追加。
+
+- `--dry-run`: ファイルを書かずに解決結果を stdout に出力
+- `--json`: DepGraph を JSON で stdout に出力（Agent interoperability contract）
+
+**Stdout Contract:**
+- `--json` の stdout は valid JSON のみ（picocolors / checkmark 禁止）
+- stderr に診断メッセージを分離
+
+**追加ファイル:**
+- `packages/shared/src/deps.ts` — `DepGraphJsonOutput` 型
+- `packages/core/src/deps.ts` — `toDepGraphJsonOutput()` ヘルパー
+
+**修正ファイル:**
+- `packages/cli/src/commands/snapshot.ts` — `--dry-run` / `--json` フラグ追加
+- `packages/cli/src/index.ts` — オプション登録
+
+---
+
+### 8-C. evlite context — Agent Context Compiler ✅ (Phase D2)
+
+**実装日:** 2026-05-27
+
+`evlite context <entrypoint> --goal "..."` を1コマンドで実行すると、
+dependency snapshot の生成から pack.json / pack.md の出力まで完結する。
+
+```powershell
+evlite context packages/core/src/index.ts --goal "implement --output option" --stack evlite
+```
+
+**dry-run モード:**
+- `generateSnapshot()` を呼ばず `resolveDeps()` のみ実行
+- ファイルを一切書かない
+- stdout: `ContextDryRunResult` の JSON のみ（`_dryRun: true` を含む）
+
+**追加ファイル:**
+- `packages/core/src/context.ts` — `generateContext()` / `generateContextDryRun()`
+- `packages/cli/src/commands/context.ts` — `context` コマンド
+
+---
+
+### 8-D. evlite validate --affected — Reverse Lookup ✅ (Phase D3a)
+
+**実装日:** 2026-05-27
+
+source file path を渡すと、そのファイルを含む snapshot と
+その snapshot を `mustRead` に持つ pack を逆引きして列挙する。
+
+```powershell
+evlite validate --affected packages/core/src/snapshot.ts
+evlite validate --affected packages/core/src/snapshot.ts --json
+```
+
+**snapshot path 解決:** `node.path` → `node.filePath` → `node.source` → fallback（frontmatter ev_id 走査）の4段階。
+
+**既知の限界（v0.1）:** 部分文字列マッチのため `snap.ts` が `snapshot.ts` に誤ヒットする可能性あり。v0.2 で `## {path}` セクションパーサーに改善予定。
+
+**追加ファイル:**
+- `packages/core/src/affected.ts` — `findAffected()`
+- `packages/cli/src/commands/validate.ts` — `--affected` / `--json` オプション追加
