@@ -8,6 +8,7 @@ import { runValidate } from "./commands/validate.js";
 import { runUi } from "./commands/ui.js";
 import { runSnapshot } from "./commands/snapshot.js";
 import { runReport } from "./commands/report.js";
+import { createContextCommand } from "./commands/context.js";
 
 function collect(value: string, previous: string[]): string[] {
   return [...previous, value];
@@ -207,6 +208,8 @@ program
       });
     },
   );
+
+program.addCommand(createContextCommand());
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   const message = err instanceof Error ? err.message : String(err);
