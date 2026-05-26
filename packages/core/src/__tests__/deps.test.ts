@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveDeps, renderDepTree } from "../deps.js";
+import { resolveDeps, renderDepTree, toDepGraphJsonOutput } from "../deps.js";
 import type { DepGraph } from "@ev-lite/shared";
 import type { DepSkipReason } from "@ev-lite/shared";
 
@@ -192,5 +192,55 @@ describe("renderDepTree", () => {
     expect(renderDepTree(graph)).toBe(
       ["a.ts", "└── b.ts", "    └── a.ts (visited)"].join("\n"),
     );
+  });
+});
+
+describe("toDepGraphJsonOutput", () => {
+  it("wraps a DepGraph with mode/summary, preserving files/edges/skipped", () => {
+    const graph: DepGraph = {
+      entrypoint: "a.ts",
+      root: "/repo",
+      files: ["a.ts", "b.ts"],
+      edges: [["a.ts", "b.ts"]],
+      skipped: [{ from: "a.ts", specifier: "fs", reason: "external" }],
+    };
+    const out = toDepGraphJsonOutput(graph, {
+      maxDepth: 7,
+      includeTests: true,
+    });
+    expect(out.mode).toBe("deps");
+    expect(out.entrypoint).toBe("a.ts");
+    expect(out.root).toBe("/repo");
+    expect(out.files).toEqual(["a.ts", "b.ts"]);
+    expect(out.edges).toEqual([["a.ts", "b.ts"]]);
+    expect(out.skipped).toEqual([
+      { from: "a.ts", specifier: "fs", reason: "external" },
+    ]);
+    expect(out.summary).toEqual({
+      fileCount: 2,
+      edgeCount: 1,
+      skippedCount: 1,
+      maxDepth: 7,
+      includeTests: true,
+    });
+  });
+
+  it("produces JSON.parse-able output even with an empty graph", () => {
+    const graph: DepGraph = {
+      entrypoint: "lonely.ts",
+      root: "/repo",
+      files: ["lonely.ts"],
+      edges: [],
+      skipped: [],
+    };
+    const out = toDepGraphJsonOutput(graph, {
+      maxDepth: 10,
+      includeTests: false,
+    });
+    const round = JSON.parse(JSON.stringify(out));
+    expect(round).toEqual(out);
+    expect(round.summary.fileCount).toBe(1);
+    expect(round.summary.edgeCount).toBe(0);
+    expect(round.summary.skippedCount).toBe(0);
   });
 });

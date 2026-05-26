@@ -142,6 +142,14 @@ program
   )
   .option("--include-tests", "include .spec.ts / .test.ts files")
   .option("--no-dep-tree", "omit dependency tree section from snapshot.md")
+  .option(
+    "--dry-run",
+    "resolve dependency snapshot without writing snapshot.md",
+  )
+  .option(
+    "--json",
+    "print dependency graph as JSON without writing snapshot.md",
+  )
   .action(
     async (
       inputPath: string,
@@ -156,6 +164,8 @@ program
         maxDepth?: number;
         includeTests?: boolean;
         depTree?: boolean;
+        dryRun?: boolean;
+        json?: boolean;
       },
     ) => {
       await runSnapshot(inputPath, {
@@ -169,6 +179,8 @@ program
         maxDepth: opts.maxDepth,
         includeTests: opts.includeTests,
         noDepTree: opts.depTree === false,
+        dryRun: opts.dryRun,
+        json: opts.json,
       });
     },
   );

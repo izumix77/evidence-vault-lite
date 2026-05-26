@@ -4,12 +4,19 @@
 
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname, relative, extname } from "node:path";
-import type { DepGraph, DepSkip, DepSkipReason } from "@ev-lite/shared";
+import type {
+  DepGraph,
+  DepGraphJsonOutput,
+  DepSkip,
+  DepSkipReason,
+} from "@ev-lite/shared";
 
 export interface ResolveDepsOptions {
   maxDepth?: number;
   includeTests?: boolean;
 }
+
+export const DEFAULT_DEPS_MAX_DEPTH = 10;
 
 const SUPPORTED_EXTS = [".ts", ".tsx", ".js", ".jsx"] as const;
 const TEST_PATTERN = /\.(spec|test)\.[tj]sx?$/;
@@ -200,6 +207,27 @@ export function renderDepTree(graph: DepGraph): string {
   }
   const root = buildTreeNode(graph.entrypoint, edgeMap, new Set());
   return renderTree(root);
+}
+
+export function toDepGraphJsonOutput(
+  depGraph: DepGraph,
+  opts: { maxDepth: number; includeTests: boolean },
+): DepGraphJsonOutput {
+  return {
+    mode: "deps",
+    entrypoint: depGraph.entrypoint,
+    root: depGraph.root,
+    files: depGraph.files,
+    edges: depGraph.edges,
+    skipped: depGraph.skipped,
+    summary: {
+      fileCount: depGraph.files.length,
+      edgeCount: depGraph.edges.length,
+      skippedCount: depGraph.skipped.length,
+      maxDepth: opts.maxDepth,
+      includeTests: opts.includeTests,
+    },
+  };
 }
 
 export function renderSkippedTable(graph: DepGraph): string {

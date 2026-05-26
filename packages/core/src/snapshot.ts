@@ -2,10 +2,14 @@ import path from "node:path";
 import fs from "fs-extra";
 import fg from "fast-glob";
 import type { DepGraph } from "@ev-lite/shared";
-import { resolveDeps, renderDepTree, renderSkippedTable } from "./deps.js";
+import {
+  DEFAULT_DEPS_MAX_DEPTH,
+  resolveDeps,
+  renderDepTree,
+  renderSkippedTable,
+} from "./deps.js";
 
 const SNAPSHOT_VERSION = "0.1.0";
-const DEFAULT_DEPS_MAX_DEPTH = 10;
 
 const DEFAULT_INCLUDE: string[] = [
   "**/*.ts",
