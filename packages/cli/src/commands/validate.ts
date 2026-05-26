@@ -5,6 +5,7 @@ import {
   loadRegistry,
   listPackIds,
   readPackConfig,
+  findAffected,
   type EvidenceStatus,
   type EvidenceNode,
 } from "@ev-lite/core";
@@ -21,10 +22,75 @@ export type ValidateOptions = {
   focus?: string;
   focusDir?: string;
   activeOnly?: boolean;
+  affected?: string;
+  json?: boolean;
 };
+
+function pad(s: string, width: number): string {
+  return s.length >= width ? s : s + " ".repeat(width - s.length);
+}
+
+async function runAffected(
+  root: string,
+  file: string,
+  jsonMode: boolean,
+): Promise<void> {
+  const result = await findAffected(file, root);
+
+  if (jsonMode) {
+    process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+    return;
+  }
+
+  console.log(`Affected analysis for: ${result.file}`);
+  console.log("");
+
+  if (result.affectedSnapshots.length === 0) {
+    console.log("No snapshots found containing this file.");
+    console.log("No packs affected.");
+    return;
+  }
+
+  console.log("Snapshots containing this file:");
+  const evIdWidth = Math.max(
+    ...result.affectedSnapshots.map((s) => s.evId.length),
+  );
+  for (const s of result.affectedSnapshots) {
+    console.log(`  ${pad(s.evId, evIdWidth)}  (${s.path})`);
+  }
+  console.log("");
+
+  if (result.affectedPacks.length === 0) {
+    console.log("Packs referencing affected snapshots:");
+    console.log("  (none)");
+  } else {
+    console.log("Packs referencing affected snapshots:");
+    const packIdWidth = Math.max(
+      ...result.affectedPacks.map((p) => p.packId.length),
+    );
+    const pathWidth = Math.max(
+      ...result.affectedPacks.map((p) => p.path.length),
+    );
+    for (const p of result.affectedPacks) {
+      console.log(
+        `  ${pad(p.packId, packIdWidth)}  (${pad(p.path, pathWidth)})  mustRead: ${p.viaEvId}`,
+      );
+    }
+  }
+  console.log("");
+  console.log(
+    `${result.summary.snapshotCount} snapshot(s), ${result.summary.packCount} pack(s) affected.`,
+  );
+}
 
 export async function runValidate(options: ValidateOptions): Promise<void> {
   const root = options.root ? path.resolve(options.root) : process.cwd();
+
+  if (options.affected) {
+    await runAffected(root, options.affected, options.json === true);
+    return;
+  }
+
   const registryPath = path.join(root, ".ev-lite", "registry.json");
   const registry = await loadRegistry(registryPath);
 

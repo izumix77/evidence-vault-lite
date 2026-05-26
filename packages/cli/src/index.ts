@@ -77,6 +77,11 @@ program
     "--active-only",
     "with --show-depends: skip superseded related nodes",
   )
+  .option(
+    "--affected <file>",
+    "find snapshots and packs affected by a file change",
+  )
+  .option("--json", "output affected result as JSON (use with --affected)")
   .action(
     async (opts: {
       root?: string;
@@ -90,6 +95,8 @@ program
       focus?: string;
       focusDir?: string;
       activeOnly?: boolean;
+      affected?: string;
+      json?: boolean;
     }) => {
       await runValidate({
         root: opts.root,
@@ -103,6 +110,8 @@ program
         focus: opts.focus,
         focusDir: opts.focusDir,
         activeOnly: opts.activeOnly,
+        affected: opts.affected,
+        json: opts.json,
       });
     },
   );

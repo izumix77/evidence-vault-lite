@@ -8,6 +8,7 @@ export * from "./packs.js";
 export * from "./snapshot.js";
 export * from "./deps.js";
 export * from "./context.js";
+export * from "./affected.js";
 export * from "./favorites.js";
 export * from "./settings.js";
 export * from "@ev-lite/shared";
