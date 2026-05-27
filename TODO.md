@@ -355,8 +355,8 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 | ✅ P4 | `evlite validate --show-orphans` | core / cli | S |
 | ✅ P5 | `evlite validate --show-depends`（`--active-only` オプション追加予定） | core / cli | S |
 | ✅ P6 | `evlite validate --show-cycles` | core / cli | S |
-| 🟠 P6-ext-a | `evlite validate --output` オプション | core / cli | S |
-| 🟠 P6-ext-b | `evlite validate --focus` / `--focus-dir` オプション | core / cli | S |
+| ✅ P6-ext-a | `evlite validate --output` オプション | core / cli | S |
+| ✅ P6-ext-b | `evlite validate --focus` / `--focus-dir` オプション | core / cli | S |
 | 🟠 P6.5 | ファイルリスト ソート切り替え（名前順 / status順 / scan順） | ui | S |
 | 🟠 P6.6 | Pack Builder — Import JSON | ui | S |
 | 🟡 P7-1 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
@@ -370,6 +370,9 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 | 🟡 P9-e | `GET /api/dirs` + Directory Browser UI | server / ui | M |
 | ⬜ — | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
 | ✅ | snapshot --deps（依存追跡モード） | shared / core / cli / ui / server | M |
+| ✅ | snapshot --deps --dry-run / --json（machine-readable contract）| shared / core / cli | S |
+| ✅ | evlite context（Agent Context Compiler）| core / cli | M |
+| ✅ | validate --affected（source file → snapshot → pack 逆引き）| core / cli | S |
 
 ---
 
