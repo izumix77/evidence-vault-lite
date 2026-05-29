@@ -47,7 +47,7 @@ supersedes: []
 - [ ] zod スキーマを更新
 - [ ] `effectiveStatus()` との整合確認（topology 導出 vs 明示指定の優先関係）
 
-### 1-B. EvidenceNode 拡張 🟠
+### 1-B. EvidenceNode 拡張 ✅
 
 ```ts
 // 追加するフィールド
@@ -55,8 +55,8 @@ derived_tags?: DerivedTag[]
 importance?:  ImportanceScore
 ```
 
-- [ ] `EvidenceNode` に `derived_tags` / `importance` フィールドを追加
-- [ ] zod スキーマを更新
+- [x] `EvidenceNode` に `derived_tags` / `importance` フィールドを追加
+- [x] zod スキーマを更新
 
 ### 1-C. HandoverReport 型 🔴
 
@@ -75,14 +75,14 @@ Constitution v0.5 §2.6 の型定義をそのまま実装する。
 - [ ] zod スキーマを追加
 - [ ] frontmatter パーサーで `type: "report"` / `report_kind` を認識
 
-### 1-E. ImportanceScore 型 🟡
+### 1-E. ImportanceScore 型 ✅
 
-- [ ] `ImportanceScore` 型を追加
-- [ ] zod スキーマを追加
+- [x] `ImportanceScore` 型を追加
+- [x] zod スキーマを追加
 
-### 1-F. DerivedTag 型 🟠
+### 1-F. DerivedTag 型 ✅
 
-- [ ] `DerivedTag` union 型を追加（Constitution v0.5 §2.8 の値一覧）
+- [x] `DerivedTag` union 型を追加（Constitution v0.5 §2.8 の値一覧）
 
 ### 1-G. RiskSignal 型 🟡
 
@@ -98,19 +98,19 @@ Constitution v0.5 §2.6 の型定義をそのまま実装する。
 - [ ] `HandoverReport.must_read` の ev_id を依存グラフの参照対象に含める
 - [ ] `EVReport.required_packs_for_continuation` を参照対象に含める
 
-### 2-B. Auto Tag 導出（Freshness + Lifecycle）🟠
+### 2-B. Auto Tag 導出（Freshness + Lifecycle）✅
 
 Constitution v0.5 §2.8 の `deriveTags()` を実装する。
 
-- [ ] `deriveTags(doc: EvidenceNode): DerivedTag[]` を `@ev-lite/core` に追加
-- [ ] `evlite scan` 時に `derived_tags` を各 `EvidenceNode` に付与して `registry.json` に格納
-- [ ] frontmatter へは**書き戻さない**（read-only）
+- [x] `deriveTags(doc: EvidenceNode): DerivedTag[]` を `@ev-lite/core` に追加
+- [x] `evlite scan` 時に `derived_tags` を各 `EvidenceNode` に付与して `registry.json` に格納
+- [x] frontmatter へは**書き戻さない**（read-only）
 
-### 2-C. ImportanceScore 集計 🟡
+### 2-C. ImportanceScore 集計 ✅
 
-- [ ] `evlite scan` 時に全 node の `reference_count` / `pack_dependency_count` を集計
-- [ ] `EvidenceNode.importance` に格納して `registry.json` に書き込む
-- [ ] Auto Tag 導出の Usage Tags（HOT / CORE / COLD / FOUNDATIONAL）はこの集計後に発火
+- [x] `evlite scan` 時に全 node の `reference_count` / `pack_dependency_count` を集計
+- [x] `EvidenceNode.importance` に格納して `registry.json` に書き込む
+- [x] Auto Tag 導出の Usage Tags（HOT / CORE / COLD / FOUNDATIONAL）はこの集計後に発火
 
 ### 2-D. validate — --show-impact 🔴
 
@@ -139,18 +139,18 @@ Impact:
 
 - [ ] `depends_on` / `supersedes` の循環を検出
 
-### 2-H. validate — --show-importance 🟡
+### 2-H. validate — --show-importance ✅
 
-- [ ] `ImportanceScore` と `DerivedTag` の一覧を表示
+- [x] `ImportanceScore` と `DerivedTag` の一覧を表示
 
-### 2-I. validate — RiskSignal 出力 🟡
+### 2-I. validate — RiskSignal 出力（stale_dependency ✅ / knowledge_bottleneck・semantic_monoculture ⬜ Phase 5）
 
 Constitution v0.5 §2.9 の 3 種を検出して出力する。
 
-- [ ] `stale_dependency` — pack / report / handover の `must_read` / `depends_on` が OLD または STALE な文書を参照している検出
+- [x] `stale_dependency` — pack / report / handover の `must_read` / `depends_on` が OLD または STALE な文書を参照している検出
   - ※ 「エージェントが繰り返し参照」の検出は agent usage 履歴が必要なため Phase 5 に回す
-- [ ] `knowledge_bottleneck` — 複数 pack が同一 SUPERSEDED pack に依存している検出
-- [ ] `semantic_monoculture` — HOT 文書が canonical でない検出
+- [ ] `knowledge_bottleneck` — 複数 pack が同一 SUPERSEDED pack に依存している検出（⬜ Phase 5）
+- [ ] `semantic_monoculture` — HOT 文書が canonical でない検出（⬜ Phase 5）
 
 ### 2-J. validate — --output オプション 🟠
 
@@ -241,7 +241,7 @@ evlite report my-impl --kind implementation --stack dgc
 - [ ] 新規 EVReport 作成フォーム（report_kind セレクタ付き）
 - [ ] `required_packs_for_continuation` の pack 候補サジェスト
 
-### 5-D. Metadata Editor — DerivedTag バッジ 🟡
+### 5-D. Metadata Editor — DerivedTag バッジ ✅
 
 - [ ] `derived_tags` を読み取り専用バッジとして表示（NEW / OLD / STALE / FOUNDATIONAL など）
 
@@ -306,7 +306,7 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 - [x] `EvLiteSettings` に `description?: string` を追加
 - [x] 起動ログに description を表示（`settings.description` がある場合のみ）
 
-### 5-K. ファイルリスト — ソート切り替え 🟠
+### 5-K. ファイルリスト — ソート切り替え ✅
 
 - [ ] 名前順（現在のデフォルト）/ status順 / scan順 の3択切り替えを追加
 - [ ] status順: `active → draft → experimental → deprecated → archived → superseded → stale`
@@ -314,7 +314,7 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 - [ ] 切り替えは UI 上部のボタンまたはセレクタで操作
 - [ ] server / core の変更は不要（UI 側のみ）
 
-### 5-L. Pack Builder — Import JSON 🟠
+### 5-L. Pack Builder — Import JSON ✅
 
 AI が生成した pack.json 構造を UI から直接インポートできるようにする。
 
@@ -332,7 +332,17 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 - [ ] 貼り付けた JSON を ContextPackSchema で parse / validate
 - [ ] parse 成功時: Pack Builder のフォームに反映して Save Pack
 - [ ] parse 失敗時: エラーメッセージを表示
-- [ ] server / core の変更は不要（UI 側のみ）
+- [x] server / core の変更は不要（UI 側のみ）
+
+### 5-M. Pack Builder — Prompt Vault 拡張 ✅
+
+EVReport / HandoverReport を次の pack の mustRead に接続するためのヘルパー UI。
+
+- [x] `[ + Add from registry ]` — registry から ev_id を mustRead に追加
+- [x] `[ + From report/handover ]` — EVReport の `required_packs_for_continuation` / HandoverReport の `must_read` を候補として表示・追加
+- [x] `related[]` フィールドへの artifacts 保存
+- [x] `ContextPackSchema` に `related?: string[]` を追加
+- [x] 重複 ev_id の dedup
 
 ---
 
