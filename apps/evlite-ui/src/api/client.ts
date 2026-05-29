@@ -1,5 +1,6 @@
 import type {
   ContextPack,
+  DirEntry,
   EvidenceNode,
   HandoverCreateInput,
   HandoverCreateResult,
@@ -101,4 +102,9 @@ export const api = {
       method: "POST",
       body: JSON.stringify(input),
     }),
+
+  getDirs: (dirPath?: string) => {
+    const query = dirPath ? `?path=${encodeURIComponent(dirPath)}` : "";
+    return request<DirEntry[]>(`/dirs${query}`);
+  },
 };

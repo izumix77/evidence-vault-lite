@@ -50,10 +50,23 @@ function nonEmpty(values: string[]): string[] | undefined {
 
 type Props = {
   onRegistryUpdate: () => void | Promise<void>;
+  pendingPath?: string;
+  onPendingPathConsumed?: () => void;
 };
 
-export function SnapshotBuilder({ onRegistryUpdate }: Props) {
+export function SnapshotBuilder({
+  onRegistryUpdate,
+  pendingPath,
+  onPendingPathConsumed,
+}: Props) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+
+  useEffect(() => {
+    if (pendingPath) {
+      setForm((prev) => ({ ...prev, path: pendingPath }));
+      onPendingPathConsumed?.();
+    }
+  }, [pendingPath, onPendingPathConsumed]);
   const [state, setState] = useState<SnapshotState>("idle");
   const [result, setResult] = useState<SnapshotResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>("");

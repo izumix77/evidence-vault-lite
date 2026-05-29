@@ -113,3 +113,10 @@ export type HandoverCreateResult = {
   path: string;
   evId: string;
 };
+
+export type DirEntry = {
+  name: string;
+  path: string;
+  hasChildren: boolean;
+  fileCount: number;
+};

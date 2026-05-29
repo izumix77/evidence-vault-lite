@@ -6,10 +6,17 @@ import { PackBuilder } from "./components/PackBuilder";
 import { SnapshotBuilder } from "./components/SnapshotBuilder";
 import { ReportViewer } from "./components/ReportViewer";
 import { HandoverViewer } from "./components/HandoverViewer";
+import { DirBrowser } from "./components/DirBrowser";
 import type { Registry } from "./types";
 import "./App.css";
 
-type Tab = "metadata" | "pack" | "snapshot" | "reports" | "handovers";
+type Tab =
+  | "metadata"
+  | "pack"
+  | "snapshot"
+  | "reports"
+  | "handovers"
+  | "dirs";
 
 const EMPTY_REGISTRY: Registry = {
   generated_at: "",
@@ -29,6 +36,9 @@ export function App() {
   const [tab, setTab] = useState<Tab>("metadata");
   const [scanning, setScanning] = useState(false);
   const [loadError, setLoadError] = useState<string>("");
+  const [pendingSnapshotPath, setPendingSnapshotPath] = useState<
+    string | undefined
+  >(undefined);
 
   async function loadRegistry() {
     try {
@@ -60,6 +70,11 @@ export function App() {
   function handleSelect(path: string) {
     setSelectedPath(path);
     setTab("metadata");
+  }
+
+  function handleSnapshotDir(path: string) {
+    setPendingSnapshotPath(path);
+    setTab("snapshot");
   }
 
   return (
@@ -117,6 +132,12 @@ export function App() {
             >
               Handovers
             </button>
+            <button
+              className={tab === "dirs" ? "active" : ""}
+              onClick={() => setTab("dirs")}
+            >
+              Dirs
+            </button>
           </nav>
           <div className="tab-content">
             {loadError && (
@@ -137,11 +158,22 @@ export function App() {
             )}
             {tab === "pack" && <PackBuilder registry={registry} />}
             {tab === "snapshot" && (
-              <SnapshotBuilder onRegistryUpdate={loadRegistry} />
+              <SnapshotBuilder
+                onRegistryUpdate={loadRegistry}
+                pendingPath={pendingSnapshotPath}
+                onPendingPathConsumed={() => setPendingSnapshotPath(undefined)}
+              />
             )}
             {tab === "reports" && <ReportViewer />}
             {tab === "handovers" && (
               <HandoverViewer onCreated={loadRegistry} />
+            )}
+            {tab === "dirs" && (
+              <DirBrowser
+                registry={registry}
+                onSelectFile={handleSelect}
+                onSnapshotDir={handleSnapshotDir}
+              />
             )}
           </div>
         </main>

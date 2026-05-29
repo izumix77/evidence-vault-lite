@@ -12,6 +12,7 @@ import { registerSnapshotRoutes } from "./routes/snapshot.js";
 import { registerFavoritesRoutes } from "./routes/favorites.js";
 import { registerReportsRoutes } from "./routes/reports.js";
 import { registerHandoverRoutes } from "./routes/handover.js";
+import { registerDirsRoutes } from "./routes/dirs.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,6 +37,7 @@ export function createApp(opts: AppOptions): Hono {
   registerFavoritesRoutes(app, opts);
   registerReportsRoutes(app, opts);
   registerHandoverRoutes(app, opts);
+  registerDirsRoutes(app, opts);
 
   app.use("/*", serveStatic({ root: UI_DIST_PATH }));
 
