@@ -306,15 +306,15 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 - [x] `EvLiteSettings` に `description?: string` を追加
 - [x] 起動ログに description を表示（`settings.description` がある場合のみ）
 
-### 5-K. ファイルリスト — ソート切り替え ✅
+### 5-K. ファイルリスト — ソート切り替え 🟠
 
-- [x] 名前順（現在のデフォルト）/ status順 / scan順 の3択切り替えを追加
-- [x] status順: `active → draft → experimental → deprecated → archived → superseded → stale`
-- [x] scan順: registry の登録順（`registry.json` の配列順）
-- [x] 切り替えは UI 上部のボタンまたはセレクタで操作
-- [x] server / core の変更は不要（UI 側のみ）
+- [ ] 名前順（現在のデフォルト）/ status順 / scan順 の3択切り替えを追加
+- [ ] status順: `active → draft → experimental → deprecated → archived → superseded → stale`
+- [ ] scan順: registry の登録順（`registry.json` の配列順）
+- [ ] 切り替えは UI 上部のボタンまたはセレクタで操作
+- [ ] server / core の変更は不要（UI 側のみ）
 
-### 5-L. Pack Builder — Import JSON ✅
+### 5-L. Pack Builder — Import JSON 🟠
 
 AI が生成した pack.json 構造を UI から直接インポートできるようにする。
 
@@ -327,12 +327,12 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 → そのまま Generate pack.md へ
 ```
 
-- [x] Pack Builder に [ Import JSON ] ボタンを追加
-- [x] JSON 入力用モーダル or テキストエリアを表示
-- [x] 貼り付けた JSON を ContextPackSchema で parse / validate
-- [x] parse 成功時: Pack Builder のフォームに反映して Save Pack
-- [x] parse 失敗時: エラーメッセージを表示
-- [x] server / core の変更は不要（UI 側のみ）
+- [ ] Pack Builder に [ Import JSON ] ボタンを追加
+- [ ] JSON 入力用モーダル or テキストエリアを表示
+- [ ] 貼り付けた JSON を ContextPackSchema で parse / validate
+- [ ] parse 成功時: Pack Builder のフォームに反映して Save Pack
+- [ ] parse 失敗時: エラーメッセージを表示
+- [ ] server / core の変更は不要（UI 側のみ）
 
 ---
 
@@ -357,11 +357,12 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 | ✅ P6 | `evlite validate --show-cycles` | core / cli | S |
 | ✅ P6-ext-a | `evlite validate --output` オプション | core / cli | S |
 | ✅ P6-ext-b | `evlite validate --focus` / `--focus-dir` オプション | core / cli | S |
-| ✅ P6.5 | ファイルリスト ソート切り替え（名前順 / status順 / scan順） | ui | S |
-| ✅ P6.6 | Pack Builder — Import JSON | ui | S |
+| 🟠 P6.5 | ファイルリスト ソート切り替え（名前順 / status順 / scan順） | ui | S |
+| 🟠 P6.6 | Pack Builder — Import JSON | ui | S |
 | 🟡 P7-1 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
-| 🟡 P7-2 | `evlite handover` コマンド | cli | S |
-| 🟡 P7-3 | `GET /api/handovers` + Handover タブ UI | server / ui | M |
+| ✅ P7-2 | `evlite handover` コマンド | cli | S |
+| ✅ P7-3 | `GET /api/handovers` + Handover タブ UI | server / ui | M |
+| ⬜ P7-debt | handover frontmatter テンプレート定数を cli / server から `@ev-lite/shared` に切り出す | shared / cli / server | XS |
 | 🟡 P8 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
 | 🟡 P9-a | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
 | 🟡 P9-b | `ImportanceScore` 集計 + Usage Tags | core | M |
