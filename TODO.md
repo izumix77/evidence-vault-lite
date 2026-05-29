@@ -362,12 +362,12 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 | 🟡 P7-1 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
 | 🟡 P7-2 | `evlite handover` コマンド | cli | S |
 | 🟡 P7-3 | `GET /api/handovers` + Handover タブ UI | server / ui | M |
-| ✅ P8 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
-| ⬜ P8-debt | `related: []` 保存時の空配列 vs 省略を統一（pack diff が増える前に） | ui / shared | XS |
-| 🟡 P9-a | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
-| 🟡 P9-b | `ImportanceScore` 集計 + Usage Tags | core | M |
-| 🟡 P9-c | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
-| 🟡 P9-d | Metadata Editor DerivedTag バッジ | ui | S |
+| 🟡 P8 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
+| ✅ P9-a | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
+| ✅ P9-b | `ImportanceScore` 集計 + Usage Tags | core | M |
+| ✅ P9-c | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
+| ✅ P9-d | Metadata Editor DerivedTag バッジ | ui | S |
+| ⬜ P9-debt | COLD / ORPHAN の語義を明示分離（COLD = 参照状態、ORPHAN = 運用上危険な COLD）| core / cli | XS |
 | 🟡 P9-e | `GET /api/dirs` + Directory Browser UI | server / ui | M |
 | ⬜ — | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
 | ✅ | snapshot --deps（依存追跡モード） | shared / core / cli / ui / server | M |
