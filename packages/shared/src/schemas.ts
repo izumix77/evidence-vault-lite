@@ -105,4 +105,5 @@ export const ContextPackSchema = z.object({
   doNotInfer: z.array(z.string()),
   outputGoal: z.array(z.string()),
   status:     z.enum(["active", "draft"]).optional(),
+  related:    z.array(z.string()).optional(),
 });

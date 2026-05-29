@@ -3,6 +3,8 @@ import { ContextPackSchema } from "@ev-lite/shared";
 import { api } from "../api/client";
 import type { ContextPack, Registry } from "../types";
 import { EvIdListEditor } from "./EvIdListEditor";
+import { RegistryPicker } from "./RegistryPicker";
+import { ReportHandoverPicker } from "./ReportHandoverPicker";
 
 type ListKey = "doNotInfer" | "outputGoal";
 
@@ -20,7 +22,22 @@ const EMPTY_PACK: ContextPack = {
   mustRead: [],
   doNotInfer: [],
   outputGoal: [],
+  related: [],
 };
+
+type PickerKind = "mustRead-registry" | "mustRead-report" | "related-registry";
+
+function mergeUnique(base: string[], incoming: string[]): string[] {
+  const seen = new Set(base);
+  const out = [...base];
+  for (const v of incoming) {
+    if (!v) continue;
+    if (seen.has(v)) continue;
+    seen.add(v);
+    out.push(v);
+  }
+  return out;
+}
 
 type Props = {
   registry: Registry;
@@ -37,6 +54,7 @@ export function PackBuilder({ registry }: Props) {
   const [importOpen, setImportOpen] = useState<boolean>(false);
   const [importText, setImportText] = useState<string>("");
   const [importError, setImportError] = useState<string>("");
+  const [picker, setPicker] = useState<PickerKind | null>(null);
 
   useEffect(() => {
     api
@@ -257,6 +275,20 @@ export function PackBuilder({ registry }: Props) {
         listIdPrefix="pack-mustRead"
         reorderable={true}
       />
+      <div className="picker-actions">
+        <button
+          type="button"
+          onClick={() => setPicker("mustRead-registry")}
+        >
+          + Add from registry
+        </button>
+        <button
+          type="button"
+          onClick={() => setPicker("mustRead-report")}
+        >
+          + From report/handover
+        </button>
+      </div>
 
       <ListField
         label="doNotInfer"
@@ -273,6 +305,25 @@ export function PackBuilder({ registry }: Props) {
         onUpdate={(i, v) => updateListItem("outputGoal", i, v)}
         onRemove={(i) => removeListItem("outputGoal", i)}
       />
+
+      <EvIdListEditor
+        label="related"
+        values={pack.related ?? []}
+        onChange={(v) =>
+          setPack((prev) => ({ ...prev, related: v }))
+        }
+        registry={registry}
+        listIdPrefix="pack-related"
+        reorderable={true}
+      />
+      <div className="picker-actions">
+        <button
+          type="button"
+          onClick={() => setPicker("related-registry")}
+        >
+          + Add related
+        </button>
+      </div>
 
       <div className="form-actions">
         <button
@@ -358,6 +409,52 @@ export function PackBuilder({ registry }: Props) {
             </div>
           </div>
         </div>
+      )}
+
+      {picker === "mustRead-registry" && (
+        <RegistryPicker
+          title="Add to mustRead — from registry"
+          nodes={registry.nodes}
+          alreadySelected={pack.mustRead}
+          onCancel={() => setPicker(null)}
+          onConfirm={(ids) => {
+            setPack((prev) => ({
+              ...prev,
+              mustRead: mergeUnique(prev.mustRead, ids),
+            }));
+            setPicker(null);
+          }}
+        />
+      )}
+
+      {picker === "mustRead-report" && (
+        <ReportHandoverPicker
+          alreadySelected={pack.mustRead}
+          onCancel={() => setPicker(null)}
+          onConfirm={(ids) => {
+            setPack((prev) => ({
+              ...prev,
+              mustRead: mergeUnique(prev.mustRead, ids),
+            }));
+            setPicker(null);
+          }}
+        />
+      )}
+
+      {picker === "related-registry" && (
+        <RegistryPicker
+          title="Add to related"
+          nodes={registry.nodes}
+          alreadySelected={pack.related ?? []}
+          onCancel={() => setPicker(null)}
+          onConfirm={(ids) => {
+            setPack((prev) => ({
+              ...prev,
+              related: mergeUnique(prev.related ?? [], ids),
+            }));
+            setPicker(null);
+          }}
+        />
       )}
     </div>
   );

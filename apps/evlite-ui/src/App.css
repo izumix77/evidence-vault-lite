@@ -185,10 +185,6 @@ body {
   color: #c9d1d9;
 }
 
-.file-list-section-name {
-  /* inherits color from summary */
-}
-
 .file-list-section-count {
   color: #6e7681;
   text-transform: none;
@@ -928,6 +924,224 @@ button.primary:hover {
   gap: 8px;
   padding: 12px 16px;
   border-top: 1px solid #30363d;
+}
+
+.modal-wide {
+  width: min(760px, 94vw);
+}
+
+/* ---------- Pack Builder pickers ---------- */
+.picker-actions {
+  display: flex;
+  gap: 6px;
+  margin: -8px 0 14px 112px;
+}
+
+.picker-actions button {
+  padding: 3px 10px;
+  font-size: 11px;
+}
+
+.picker-search {
+  width: 100%;
+  padding: 6px 10px;
+  background: #0e1117;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.picker-search:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+
+.picker-list {
+  flex: 1;
+  min-height: 200px;
+  max-height: 48vh;
+  overflow-y: auto;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  background: #0e1117;
+}
+
+.picker-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #161b22;
+  cursor: pointer;
+}
+
+.picker-row:last-child {
+  border-bottom: none;
+}
+
+.picker-row:hover {
+  background: #1f2933;
+}
+
+.picker-row-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.picker-row input[type="checkbox"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.picker-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.picker-row-evid {
+  color: #58a6ff;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.picker-row-title {
+  color: #c9d1d9;
+  font-size: 11px;
+}
+
+.picker-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 10px;
+  color: #8b949e;
+}
+
+.picker-row-path {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  word-break: break-all;
+}
+
+.picker-row-tag {
+  padding: 0 6px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 3px;
+  font-size: 10px;
+  color: #6e7681;
+}
+
+.picker-preview {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #0e1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.picker-preview-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b949e;
+  margin-bottom: 6px;
+}
+
+.picker-preview ul {
+  margin: 0;
+  padding-left: 16px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: #58a6ff;
+}
+
+.picker-preview li {
+  word-break: break-all;
+}
+
+/* report/handover source picker */
+.picker-source {
+  border-bottom: 1px solid #161b22;
+}
+
+.picker-source:last-child {
+  border-bottom: none;
+}
+
+.picker-source-summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+}
+
+.picker-source-summary:hover {
+  background: #1f2933;
+}
+
+.picker-source-arrow {
+  width: 10px;
+  font-size: 8px;
+  color: #6e7681;
+  flex-shrink: 0;
+}
+
+.picker-source-kind {
+  padding: 1px 6px;
+  font-size: 10px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  flex-shrink: 0;
+}
+
+.picker-source-kind.kind-report {
+  color: #d29922;
+  border-color: #4d3b0e;
+}
+
+.picker-source-kind.kind-handover {
+  color: #58a6ff;
+  border-color: #1f4068;
+}
+
+.picker-source-body {
+  padding: 4px 12px 10px 32px;
+  background: #0a0d12;
+}
+
+.picker-candidate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.picker-candidate input[type="checkbox"] {
+  flex-shrink: 0;
 }
 
 /* ---------- Report Viewer ---------- */

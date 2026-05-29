@@ -37,6 +37,7 @@ export type ContextPack = {
   doNotInfer: string[];
   outputGoal: string[];
   status?: "active" | "draft";
+  related?: string[];
 };
 
 export type Registry = {
