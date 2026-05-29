@@ -360,10 +360,10 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 | 🟠 P6.5 | ファイルリスト ソート切り替え（名前順 / status順 / scan順） | ui | S |
 | 🟠 P6.6 | Pack Builder — Import JSON | ui | S |
 | 🟡 P7-1 | `HandoverReport` 型 + zod + scan 認識 | shared / core | S |
-| ✅ P7-2 | `evlite handover` コマンド | cli | S |
-| ✅ P7-3 | `GET /api/handovers` + Handover タブ UI | server / ui | M |
-| ⬜ P7-debt | handover frontmatter テンプレート定数を cli / server から `@ev-lite/shared` に切り出す | shared / cli / server | XS |
-| 🟡 P8 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
+| 🟡 P7-2 | `evlite handover` コマンド | cli | S |
+| 🟡 P7-3 | `GET /api/handovers` + Handover タブ UI | server / ui | M |
+| ✅ P8 | Prompt Vault 拡張（Pack Builder 拡張） | ui | M |
+| ⬜ P8-debt | `related: []` 保存時の空配列 vs 省略を統一（pack diff が増える前に） | ui / shared | XS |
 | 🟡 P9-a | `DerivedTag` 型 + `deriveTags()` + scan への組み込み | shared / core | S |
 | 🟡 P9-b | `ImportanceScore` 集計 + Usage Tags | core | M |
 | 🟡 P9-c | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
