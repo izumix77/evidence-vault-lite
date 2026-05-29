@@ -1,3 +1,13 @@
+---
+ev_id: 'ev:evidence-vault-lite.CHANGELOG'
+stack: evidence-vault-lite
+status: draft
+tags: []
+depends_on: []
+related: []
+supersedes: []
+---
+
 # Changelog
 
 All notable changes to EvidenceVault Lite are documented in this file.
