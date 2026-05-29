@@ -1,7 +1,7 @@
 ---
-ev_id: ev:docs.EvidenceVault Lite — LLM Command Quick Reference
+ev_id: ev:docs.llm-command-quick-reference
 stack: docs
-status: draft
+status: active
 tags: []
 depends_on: []
 related: []
@@ -41,12 +41,15 @@ registry = index of all markdown documents in the repo
 | Command                              | Description                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------- |
 | `evlite scan`                        | Update `registry.json`                                                  |
+| `evlite list`                        | List all nodes in the registry                                          |
 | `evlite snapshot <path>`             | Convert a directory into `snapshot.md`                                  |
 | `evlite snapshot <file> --deps`      | Trace dependencies from an entrypoint and snapshot only reachable files |
 | `evlite context <file> --goal "..."` | Generate snapshot + pack in one command                                 |
 | `evlite pack <pack-id>`              | Generate `pack.md` from `pack.json`                                     |
 | `evlite validate`                    | Validate dependency/reference integrity                                 |
 | `evlite validate --affected <file>`  | Reverse-lookup snapshots/packs affected by a file                       |
+| `evlite report <name> --kind <kind>` | Scaffold an EVReport document                                           |
+| `evlite handover <name>`             | Scaffold a HandoverReport document                                      |
 | `evlite ui`                          | Launch local UI → `localhost:3137`                                      |
 
 ---
@@ -150,6 +153,79 @@ evlite validate --focus-dir packages/core/src/
 
 ---
 
+## 6. Record implementation result as EVReport
+
+```powershell
+evlite report my-impl --kind implementation --stack evlite
+# → artifacts/reports/my-impl.report.md
+```
+
+Edit the generated file (fill in `goal`, `modified_areas`,
+`required_packs_for_continuation`, etc.), then:
+
+```powershell
+evlite scan
+evlite validate --show-impact ev:evlite.report-my-impl
+```
+
+The report's `required_packs_for_continuation` is surfaced by the UI's
+Pack Builder `[ + From report/handover ]` picker for the next pack.
+
+---
+
+## 7. Hand off session state as HandoverReport
+
+```powershell
+evlite handover my-session
+# → artifacts/handovers/my-session.handover.md
+```
+
+Fill in: `goal` / `current_state` / `next_actions` / `must_read`.
+
+Then `evlite scan` to register, and include the handover in your next
+pack's `mustRead` (via UI picker or by editing the pack JSON).
+
+---
+
+## 8. Inspect repository health
+
+```powershell
+# Top referenced nodes (CORE / HOT / FOUNDATIONAL surfaced inline)
+evlite validate --show-importance
+
+# Risk signals (orphan / stale / superseded / stale-dependency)
+evlite validate --show-risk
+
+# Save full report to file
+evlite validate --show-importance --show-risk --output health-report.md
+```
+
+Example output:
+
+```text
+─── IMPORTANCE REPORT ──────────────────────────────
+
+TOP REFERENCED
+  ev:dgc.constitution     refs: 24  packs: 8   CORE FOUNDATIONAL
+  ev:traceos.spec         refs: 17  packs: 5   CORE
+
+MOST PACK-DEPENDENT
+  ev:dgc.constitution     packs: 8
+
+COLD (unreferenced)
+  ev:docs.old-design
+
+─── RISK SIGNALS ───────────────────────────────────
+
+ORPHAN (not referenced by any pack or node)
+  ev:internal.scratch-notes
+
+STALE DEPENDENCY
+  pack:impl-phase1 → ev:traceid.phase1 (STALE)
+```
+
+---
+
 # Snapshot Options Quick Reference
 
 | Option            | Description                                      |
@@ -163,6 +239,24 @@ evlite validate --focus-dir packages/core/src/
 | `--no-dep-tree`   | Omit Dependency Tree section                     |
 | `--dry-run`       | Resolve dependencies without writing snapshot.md |
 | `--json`          | Output DepGraph JSON to stdout                   |
+
+---
+
+# Report Options Quick Reference
+
+| Option            | Description                                                                                                                |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `--kind <kind>`   | `implementation` / `analysis` / `architecture` / `research` / `incident` / `observer` / `retrospective` (default: `implementation`) |
+| `--stack <stack>` | Frontmatter stack value (default: `docs`)                                                                                  |
+| `--output <path>` | Output file path (default: `artifacts/reports/<name>.report.md`)                                                           |
+
+---
+
+# Handover Options Quick Reference
+
+| Option            | Description                                                            |
+| ----------------- | ---------------------------------------------------------------------- |
+| `--output <path>` | Output file path (default: `artifacts/handovers/<name>.handover.md`)   |
 
 ---
 
@@ -181,17 +275,22 @@ evlite validate --focus-dir packages/core/src/
 
 # Validate Options Quick Reference
 
-| Option                  | Description                                       |
-| ----------------------- | ------------------------------------------------- |
-| `--affected <file>`     | Reverse-lookup snapshots/packs affected by a file |
-| `--json`                | Output `--affected` result as JSON                |
-| `--show-impact <ev_id>` | Find docs/packs referencing an ev_id              |
-| `--show-orphans`        | List unreferenced nodes                           |
-| `--show-depends`        | Show depends_on / related / supersedes topology   |
-| `--show-cycles`         | Detect circular dependencies                      |
-| `--focus <ev_id>`       | Show all information for an ev_id                 |
-| `--focus-dir <path>`    | Show all information for nodes in a directory     |
-| `--strict`              | Exit with code 1 if any ERROR exists              |
+| Option                  | Description                                                      |
+| ----------------------- | ---------------------------------------------------------------- |
+| `--affected <file>`     | Reverse-lookup snapshots/packs affected by a file                |
+| `--json`                | Output `--affected` result as JSON                               |
+| `--show-impact <ev_id>` | Find docs/packs referencing an ev_id                             |
+| `--show-orphans`        | List unreferenced nodes                                          |
+| `--show-depends`        | Show depends_on / related / supersedes topology                  |
+| `--show-cycles`         | Detect circular dependencies                                     |
+| `--show-chains`         | Display supersedes chains derived from topology                  |
+| `--show-importance`     | Show TOP REFERENCED / MOST PACK-DEPENDENT / COLD nodes           |
+| `--show-risk`           | Show ORPHAN / STALE / SUPERSEDED / STALE DEPENDENCY signals      |
+| `--focus <ev_id>`       | Show all information for an ev_id                                |
+| `--focus-dir <path>`    | Show all information for nodes in a directory                    |
+| `--active-only`         | With `--show-depends`: skip superseded related nodes             |
+| `--output <path>`       | Save validate output to a file                                   |
+| `--strict`              | Exit with code 1 if any ERROR exists                             |
 
 ---
 
@@ -313,5 +412,5 @@ Together these form the foundation for:
 ---
 
 *EvidenceVault Lite — LLM Command Quick Reference*
-*Target version: evlite 0.1.0*
+*Target version: evlite 0.1.x (Phase 4)*
 *Created: 2026-05-27*
