@@ -55,8 +55,8 @@ derived_tags?: DerivedTag[]
 importance?:  ImportanceScore
 ```
 
-- [ ] `EvidenceNode` に `derived_tags` / `importance` フィールドを追加
-- [ ] zod スキーマを更新
+- [x] `EvidenceNode` に `derived_tags` / `importance` フィールドを追加
+- [x] zod スキーマを更新
 
 ### 1-C. HandoverReport 型 ✅
 
@@ -77,12 +77,12 @@ Constitution v0.5 §2.6 の型定義をそのまま実装する。
 
 ### 1-E. ImportanceScore 型 ✅
 
-- [ ] `ImportanceScore` 型を追加
-- [ ] zod スキーマを追加
+- [x] `ImportanceScore` 型を追加
+- [x] zod スキーマを追加
 
 ### 1-F. DerivedTag 型 ✅
 
-- [ ] `DerivedTag` union 型を追加（Constitution v0.5 §2.8 の値一覧）
+- [x] `DerivedTag` union 型を追加（Constitution v0.5 §2.8 の値一覧）
 
 ### 1-G. RiskSignal 型 ✅
 
@@ -102,15 +102,15 @@ Constitution v0.5 §2.6 の型定義をそのまま実装する。
 
 Constitution v0.5 §2.8 の `deriveTags()` を実装する。
 
-- [ ] `deriveTags(doc: EvidenceNode): DerivedTag[]` を `@ev-lite/core` に追加
-- [ ] `evlite scan` 時に `derived_tags` を各 `EvidenceNode` に付与して `registry.json` に格納
-- [ ] frontmatter へは**書き戻さない**（read-only）
+- [x] `deriveTags(doc: EvidenceNode): DerivedTag[]` を `@ev-lite/core` に追加
+- [x] `evlite scan` 時に `derived_tags` を各 `EvidenceNode` に付与して `registry.json` に格納
+- [x] frontmatter へは**書き戻さない**（read-only）
 
 ### 2-C. ImportanceScore 集計 ✅
 
-- [ ] `evlite scan` 時に全 node の `reference_count` / `pack_dependency_count` を集計
-- [ ] `EvidenceNode.importance` に格納して `registry.json` に書き込む
-- [ ] Auto Tag 導出の Usage Tags（HOT / CORE / COLD / FOUNDATIONAL）はこの集計後に発火
+- [x] `evlite scan` 時に全 node の `reference_count` / `pack_dependency_count` を集計
+- [x] `EvidenceNode.importance` に格納して `registry.json` に書き込む
+- [x] Auto Tag 導出の Usage Tags（HOT / CORE / COLD / FOUNDATIONAL）はこの集計後に発火
 
 ### 2-D. validate — --show-impact ✅
 
@@ -141,16 +141,15 @@ Impact:
 
 ### 2-H. validate — --show-importance ✅
 
-- [ ] `ImportanceScore` と `DerivedTag` の一覧を表示
+- [x] `ImportanceScore` と `DerivedTag` の一覧を表示
 
 ### 2-I. validate — RiskSignal 出力（stale_dependency ✅ / knowledge_bottleneck・semantic_monoculture ⬜ Phase 5）
 
 Constitution v0.5 §2.9 の 3 種を検出して出力する。
 
-- [ ] `stale_dependency` — pack / report / handover の `must_read` / `depends_on` が OLD または STALE な文書を参照している検出
-  - ※ 「エージェントが繰り返し参照」の検出は agent usage 履歴が必要なため Phase 5 に回す
-- [ ] `knowledge_bottleneck` — 複数 pack が同一 SUPERSEDED pack に依存している検出
-- [ ] `semantic_monoculture` — HOT 文書が canonical でない検出
+- [x] `stale_dependency` — pack / report / handover の `must_read` / `depends_on` が OLD または STALE な文書を参照している検出
+- [ ] `knowledge_bottleneck` — 複数 pack が同一 SUPERSEDED pack に依存している検出 ⬜ Phase 5
+- [ ] `semantic_monoculture` — HOT 文書が canonical でない検出 ⬜ Phase 5
 
 ### 2-J. validate — --output オプション ✅
 
@@ -211,7 +210,7 @@ evlite report my-impl --kind implementation --stack dgc
 
 ### 4-A. GET /api/dirs ✅
 
-- [ ] サーバー側ディレクトリブラウザ API を実装
+- [x] サーバー側ディレクトリブラウザ API を実装
 
 ### 4-B. GET /api/handovers ✅
 
@@ -227,7 +226,7 @@ evlite report my-impl --kind implementation --stack dgc
 
 ### 5-A. Directory Browser タブ ✅
 
-- [ ] `GET /api/dirs` ベースのディレクトリブラウザを追加
+- [x] `GET /api/dirs` ベースのディレクトリブラウザを追加
 
 ### 5-B. Handover タブ ✅
 
@@ -243,7 +242,7 @@ evlite report my-impl --kind implementation --stack dgc
 
 ### 5-D. Metadata Editor — DerivedTag バッジ ✅
 
-- [ ] `derived_tags` を読み取り専用バッジとして表示（NEW / OLD / STALE / FOUNDATIONAL など）
+- [x] `derived_tags` を読み取り専用バッジとして表示（NEW / OLD / STALE / FOUNDATIONAL など）
 
 ### 5-E. Pack Builder — mustRead Reorder ✅
 
@@ -308,11 +307,11 @@ evlite ui --root F:\dgc-ecosystem-docs --port 3138
 
 ### 5-K. ファイルリスト — ソート切り替え ✅
 
-- [ ] 名前順（現在のデフォルト）/ status順 / scan順 の3択切り替えを追加
-- [ ] status順: `active → draft → experimental → deprecated → archived → superseded → stale`
-- [ ] scan順: registry の登録順（`registry.json` の配列順）
-- [ ] 切り替えは UI 上部のボタンまたはセレクタで操作
-- [ ] server / core の変更は不要（UI 側のみ）
+- [x] 名前順（現在のデフォルト）/ status順 / scan順 の3択切り替えを追加
+- [x] status順: `active → draft → experimental → deprecated → archived → superseded → stale`
+- [x] scan順: registry の登録順（`registry.json` の配列順）
+- [x] 切り替えは UI 上部のボタンまたはセレクタで操作
+- [x] server / core の変更は不要（UI 側のみ）
 
 ### 5-L. Pack Builder — Import JSON ✅
 
@@ -327,12 +326,12 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 → そのまま Generate pack.md へ
 ```
 
-- [ ] Pack Builder に [ Import JSON ] ボタンを追加
-- [ ] JSON 入力用モーダル or テキストエリアを表示
-- [ ] 貼り付けた JSON を ContextPackSchema で parse / validate
-- [ ] parse 成功時: Pack Builder のフォームに反映して Save Pack
-- [ ] parse 失敗時: エラーメッセージを表示
-- [ ] server / core の変更は不要（UI 側のみ）
+- [x] Pack Builder に [ Import JSON ] ボタンを追加
+- [x] JSON 入力用モーダル or テキストエリアを表示
+- [x] 貼り付けた JSON を ContextPackSchema で parse / validate
+- [x] parse 成功時: Pack Builder のフォームに反映して Save Pack
+- [x] parse 失敗時: エラーメッセージを表示
+- [x] server / core の変更は不要（UI 側のみ）
 
 ---
 
