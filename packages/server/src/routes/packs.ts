@@ -32,6 +32,11 @@ export function registerPacksRoutes(
     const id = c.req.param("id");
     const body = await c.req.json();
     const pack = ContextPackSchema.parse(body);
+    // Normalize: omit empty `related` so it doesn't pollute pack.json diffs.
+    // Reads still tolerate either shape (pack.related ?? []).
+    if (pack.related && pack.related.length === 0) {
+      delete pack.related;
+    }
     await writePackConfig(opts.root, id, pack);
     return c.json({ ok: true });
   });

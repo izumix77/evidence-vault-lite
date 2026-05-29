@@ -107,10 +107,14 @@ export function buildRiskReport(
     return (tagsByEvId.get(evId) ?? []).includes(tag);
   };
 
+  // COLD  = structural fact: reference_count === 0 && pack_dependency_count === 0
+  //         No judgment about whether this is a problem.
+  //
+  // ORPHAN = operational risk: COLD && status is active/draft/undefined && not superseded/archived
+  //          A subset of COLD that is actionable — these nodes are reachable but forgotten.
   const orphan = nodes
     .filter((n) => {
       if (!hasTag(n.ev_id, "COLD")) return false;
-      // ORPHAN narrows COLD to nodes still "in use" — active or unset status.
       return n.status === undefined || n.status === "active";
     })
     .map((n) => n.ev_id)

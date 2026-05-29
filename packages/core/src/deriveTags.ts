@@ -57,6 +57,8 @@ export function deriveTags(
       tags.push("FOUNDATIONAL");
     }
     if (packDepCount >= 3) tags.push("HOT");
+    // COLD: pure referential state — not a risk signal by itself.
+    // Use ORPHAN (in importance-report) for operational risk assessment.
     if (refCount === 0 && packDepCount === 0) tags.push("COLD");
   }
 

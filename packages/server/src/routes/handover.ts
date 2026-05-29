@@ -5,6 +5,7 @@ import {
   loadRegistry,
   getRegistryPath,
   readMarkdownFile,
+  buildHandoverTemplate,
 } from "@ev-lite/core";
 import type { EvidenceNode } from "@ev-lite/core";
 
@@ -13,43 +14,6 @@ type HandoverNode = EvidenceNode & {
   next_actions?: string[];
   created_at?: string;
 };
-
-function buildHandoverFrontmatter(name: string, date: string): string {
-  const evId = `ev:handover.${name}`;
-  return [
-    "---",
-    `ev_id: ${evId}`,
-    `type: handover`,
-    `title: ${name}`,
-    `status: active`,
-    `created_at: ${date}`,
-    ``,
-    `must_read: []`,
-    `optional_read: []`,
-    ``,
-    `goal: ""`,
-    `current_state: ""`,
-    `next_actions: []`,
-    ``,
-    `active_decisions: []`,
-    `unresolved_questions: []`,
-    `known_risks: []`,
-    ``,
-    `related_packs: []`,
-    `related_docs: []`,
-    ``,
-    `supersedes: []`,
-    `superseded_by: []`,
-    ``,
-    `tags: []`,
-    "---",
-    "",
-    `# ${name}`,
-    "",
-    `<!-- goal, current_state, next_actions を記述 -->`,
-    "",
-  ].join("\n");
-}
 
 async function fileExists(p: string): Promise<boolean> {
   try {
@@ -132,7 +96,7 @@ export function registerHandoverRoutes(
       );
     }
     const today = new Date().toISOString().slice(0, 10);
-    const content = buildHandoverFrontmatter(name, today);
+    const content = buildHandoverTemplate(name, today);
     await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(outputPath, content, "utf8");
 
