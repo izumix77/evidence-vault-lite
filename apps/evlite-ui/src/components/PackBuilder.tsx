@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ContextPackSchema } from "@ev-lite/shared";
 import { api } from "../api/client";
 import type { ContextPack, Registry } from "../types";
 import { EvIdListEditor } from "./EvIdListEditor";
@@ -33,6 +34,9 @@ export function PackBuilder({ registry }: Props) {
   const [state, setState] = useState<PackState>("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+  const [importOpen, setImportOpen] = useState<boolean>(false);
+  const [importText, setImportText] = useState<string>("");
+  const [importError, setImportError] = useState<string>("");
 
   useEffect(() => {
     api
@@ -139,6 +143,54 @@ export function PackBuilder({ registry }: Props) {
     }));
   }
 
+  function openImport() {
+    setImportOpen(true);
+    setImportText("");
+    setImportError("");
+  }
+
+  function closeImport() {
+    setImportOpen(false);
+    setImportError("");
+  }
+
+  async function handleImport() {
+    setImportError("");
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(importText);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setImportError(`Invalid JSON: ${msg}`);
+      return;
+    }
+    const result = ContextPackSchema.safeParse(parsed);
+    if (!result.success) {
+      const issues = result.error.issues
+        .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
+        .join("\n");
+      setImportError(`Schema validation failed:\n${issues}`);
+      return;
+    }
+    const imported = result.data as ContextPack;
+    setPack(imported);
+    setSelectedId("");
+    setPreview("");
+    setImportOpen(false);
+    setState("saving");
+    setErrorMsg("");
+    try {
+      await api.putPack(imported.id, imported);
+      const ids = await api.getPacks();
+      setPackIds(ids);
+      setSelectedId(imported.id);
+      setState("idle");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : String(err));
+      setState("error");
+    }
+  }
+
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(preview);
@@ -166,6 +218,7 @@ export function PackBuilder({ registry }: Props) {
           ))}
         </select>
         <button onClick={newPack}>New</button>
+        <button onClick={openImport}>Import JSON</button>
         <button
           onClick={handleDelete}
           disabled={!selectedId || state === "deleting"}
@@ -248,6 +301,61 @@ export function PackBuilder({ registry }: Props) {
               {copied ? "Copied!" : "Copy"}
             </button>
             <pre>{preview}</pre>
+          </div>
+        </div>
+      )}
+
+      {importOpen && (
+        <div
+          className="modal-backdrop"
+          onClick={closeImport}
+          role="presentation"
+        >
+          <div
+            className="modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Import ContextPack JSON"
+          >
+            <div className="modal-header">
+              <h3>Import ContextPack JSON</h3>
+              <button
+                className="modal-close"
+                onClick={closeImport}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="modal-hint">
+                Paste a ContextPack JSON below. Required fields:{" "}
+                <code>id</code>, <code>goal</code>, <code>mustRead</code>,{" "}
+                <code>doNotInfer</code>, <code>outputGoal</code>.
+              </p>
+              <textarea
+                className="modal-textarea"
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+                placeholder='{"id":"pack:example","goal":"...","mustRead":[],"doNotInfer":[],"outputGoal":[]}'
+                spellCheck={false}
+                autoFocus
+              />
+              {importError && (
+                <pre className="modal-error">{importError}</pre>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button onClick={closeImport}>Cancel</button>
+              <button
+                className="primary"
+                onClick={handleImport}
+                disabled={!importText.trim()}
+              >
+                Import
+              </button>
+            </div>
           </div>
         </div>
       )}

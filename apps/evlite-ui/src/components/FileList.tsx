@@ -10,6 +10,24 @@ type Props = {
   onScan: () => void;
 };
 
+type SortMode = "name" | "status" | "scan";
+
+const STATUS_PRIORITY: Record<string, number> = {
+  active: 0,
+  draft: 1,
+  experimental: 2,
+  deprecated: 3,
+  archived: 4,
+  superseded: 5,
+  stale: 6,
+};
+
+function statusRank(status: string | undefined): number {
+  if (!status) return 999;
+  const rank = STATUS_PRIORITY[status];
+  return rank === undefined ? 999 : rank;
+}
+
 type FileGroup = {
   key: string;
   files: EvidenceNode[];
@@ -46,6 +64,7 @@ export function FileList({
   onSelect,
   onScan,
 }: Props) {
+  const [sortMode, setSortMode] = useState<SortMode>("name");
   const withMeta = files.filter((f) => f.ev_id !== null);
   const withoutMeta = files.filter((f) => f.ev_id === null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -99,6 +118,18 @@ export function FileList({
         >
           {scanning ? "Scanning..." : "Scan ▶"}
         </button>
+        <div className="file-list-sort">
+          <label htmlFor="file-sort">sort:</label>
+          <select
+            id="file-sort"
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value as SortMode)}
+          >
+            <option value="name">Name</option>
+            <option value="status">Status</option>
+            <option value="scan">Scan order</option>
+          </select>
+        </div>
         {addAllResult && (
           <div className="add-all-status">{addAllResult}</div>
         )}
@@ -111,6 +142,7 @@ export function FileList({
           collapsed={collapsed}
           onToggle={toggleGroup}
           onSelect={onSelect}
+          sortMode={sortMode}
           showEvId
         />
         <FileSection
@@ -120,6 +152,7 @@ export function FileList({
           collapsed={collapsed}
           onToggle={toggleGroup}
           onSelect={onSelect}
+          sortMode={sortMode}
           onAddAll={handleAddAll}
           addingAll={addingAll}
         />
@@ -135,6 +168,7 @@ type SectionProps = {
   collapsed: Set<string>;
   onToggle: (groupId: string) => void;
   onSelect: (path: string) => void;
+  sortMode: SortMode;
   showEvId?: boolean;
   onAddAll?: () => void;
   addingAll?: boolean;
@@ -147,12 +181,12 @@ function FileSection({
   collapsed,
   onToggle,
   onSelect,
+  sortMode,
   showEvId,
   onAddAll,
   addingAll,
 }: SectionProps) {
   if (files.length === 0) return null;
-  const groups = buildGroups(files);
   const sectionId = `__section__::${label}`;
   const hasSelected = files.some((f) => f.path === selectedPath);
   const isExpanded = hasSelected || !collapsed.has(sectionId);
@@ -162,6 +196,17 @@ function FileSection({
     if (hasSelected) return;
     onToggle(sectionId);
   }
+
+  const flatFiles =
+    sortMode === "status"
+      ? [...files].sort((a, b) => {
+          const rs = statusRank(a.status) - statusRank(b.status);
+          if (rs !== 0) return rs;
+          return a.path.localeCompare(b.path);
+        })
+      : sortMode === "scan"
+        ? files
+        : null;
 
   return (
     <details open={isExpanded} className="file-list-section">
@@ -186,22 +231,70 @@ function FileSection({
           </button>
         )}
       </summary>
-      {groups.map((group) => {
-        const groupId = `${label}::${group.key}`;
-        return (
-          <GroupView
-            key={groupId}
-            groupKey={group.key}
-            files={group.files}
-            selectedPath={selectedPath}
-            showEvId={showEvId}
-            isCollapsed={collapsed.has(groupId)}
-            onToggle={() => onToggle(groupId)}
-            onSelect={onSelect}
-          />
-        );
-      })}
+      {flatFiles ? (
+        <div className="file-flat-body">
+          {flatFiles.map((f) => (
+            <FileRow
+              key={f.path}
+              file={f}
+              selected={selectedPath === f.path}
+              showEvId={showEvId}
+              showStatus={sortMode === "status"}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+      ) : (
+        buildGroups(files).map((group) => {
+          const groupId = `${label}::${group.key}`;
+          return (
+            <GroupView
+              key={groupId}
+              groupKey={group.key}
+              files={group.files}
+              selectedPath={selectedPath}
+              showEvId={showEvId}
+              isCollapsed={collapsed.has(groupId)}
+              onToggle={() => onToggle(groupId)}
+              onSelect={onSelect}
+            />
+          );
+        })
+      )}
     </details>
+  );
+}
+
+type FileRowProps = {
+  file: EvidenceNode;
+  selected: boolean;
+  showEvId?: boolean;
+  showStatus?: boolean;
+  onSelect: (path: string) => void;
+};
+
+function FileRow({
+  file,
+  selected,
+  showEvId,
+  showStatus,
+  onSelect,
+}: FileRowProps) {
+  return (
+    <div
+      className={`file-item ${selected ? "selected" : ""}`}
+      onClick={() => onSelect(file.path)}
+    >
+      {showEvId && file.ev_id && (
+        <span className="ev-id">{file.ev_id}</span>
+      )}
+      <span className="path">{file.path}</span>
+      {showStatus && file.status && (
+        <span className={`file-status status-${file.status}`}>
+          {file.status}
+        </span>
+      )}
+    </div>
   );
 }
 
