@@ -1,6 +1,9 @@
 import type {
   ContextPack,
   EvidenceNode,
+  HandoverCreateInput,
+  HandoverCreateResult,
+  HandoverNode,
   MarkdownFilePayload,
   Registry,
   SnapshotInput,
@@ -90,4 +93,12 @@ export const api = {
 
   deleteFavorite: (idx: number) =>
     request<string[]>(`/favorites/${idx}`, { method: "DELETE" }),
+
+  getHandovers: () => request<HandoverNode[]>("/handovers"),
+
+  createHandover: (input: HandoverCreateInput) =>
+    request<HandoverCreateResult>("/handover", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
 };

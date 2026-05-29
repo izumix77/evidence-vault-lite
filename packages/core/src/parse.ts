@@ -44,6 +44,14 @@ export async function parseFile(
 
   const relativePath = toPosix(path.relative(root, absolutePath));
 
+  // HandoverReport: must_read is the dependency edge (next-session required reading).
+  // Treat it as depends_on for graph traversal without writing back to frontmatter.
+  const declaredDepends = asStringArray(data.depends_on);
+  const depends_on =
+    data.type === "handover"
+      ? dedupe([...asStringArray(data.must_read), ...declaredDepends])
+      : declaredDepends;
+
   return {
     ev_id:      typeof data.ev_id === "string" ? data.ev_id : null,
     kind:       "file",
@@ -52,10 +60,14 @@ export async function parseFile(
     stack:      typeof data.stack === "string" ? data.stack : undefined,
     status,
     tags:       asStringArray(data.tags),
-    depends_on: asStringArray(data.depends_on),
+    depends_on,
     related:    asStringArray(data.related),
     supersedes: asStringArray(data.supersedes),
     title,
     excerpt,
   };
+}
+
+function dedupe(values: string[]): string[] {
+  return [...new Set(values)];
 }

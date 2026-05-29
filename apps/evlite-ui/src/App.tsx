@@ -5,10 +5,11 @@ import { MetadataEditor } from "./components/MetadataEditor";
 import { PackBuilder } from "./components/PackBuilder";
 import { SnapshotBuilder } from "./components/SnapshotBuilder";
 import { ReportViewer } from "./components/ReportViewer";
+import { HandoverViewer } from "./components/HandoverViewer";
 import type { Registry } from "./types";
 import "./App.css";
 
-type Tab = "metadata" | "pack" | "snapshot" | "reports";
+type Tab = "metadata" | "pack" | "snapshot" | "reports" | "handovers";
 
 const EMPTY_REGISTRY: Registry = {
   generated_at: "",
@@ -110,6 +111,12 @@ export function App() {
             >
               Reports
             </button>
+            <button
+              className={tab === "handovers" ? "active" : ""}
+              onClick={() => setTab("handovers")}
+            >
+              Handovers
+            </button>
           </nav>
           <div className="tab-content">
             {loadError && (
@@ -133,6 +140,9 @@ export function App() {
               <SnapshotBuilder onRegistryUpdate={loadRegistry} />
             )}
             {tab === "reports" && <ReportViewer />}
+            {tab === "handovers" && (
+              <HandoverViewer onCreated={loadRegistry} />
+            )}
           </div>
         </main>
       </div>

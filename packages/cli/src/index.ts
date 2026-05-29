@@ -8,6 +8,7 @@ import { runValidate } from "./commands/validate.js";
 import { runUi } from "./commands/ui.js";
 import { runSnapshot } from "./commands/snapshot.js";
 import { runReport } from "./commands/report.js";
+import { runHandover } from "./commands/handover.js";
 import { createContextCommand } from "./commands/context.js";
 
 function collect(value: string, previous: string[]): string[] {
@@ -217,6 +218,14 @@ program
       });
     },
   );
+
+program
+  .command("handover <name>")
+  .description("Generate a HandoverReport scaffold")
+  .option("--output <path>", "output file path")
+  .action(async (name: string, opts: { output?: string }) => {
+    await runHandover(name, { output: opts.output });
+  });
 
 program.addCommand(createContextCommand());
 

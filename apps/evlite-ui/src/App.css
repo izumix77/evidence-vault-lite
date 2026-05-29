@@ -747,6 +747,72 @@ button.primary:hover {
   background: #484f58;
 }
 
+/* ---------- Handover Viewer ---------- */
+.handover-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 18px;
+}
+
+.handover-create {
+  padding: 14px 16px;
+  background: #0e1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.handover-create h3 {
+  margin: 0 0 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b949e;
+}
+
+.handover-output-preview {
+  flex: 1;
+  padding: 6px 10px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: #58a6ff;
+  word-break: break-all;
+}
+
+.handover-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  align-items: center;
+}
+
+.handover-item-date {
+  font-size: 10px;
+  color: #8b949e;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.handover-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  background: #1f2933;
+  color: #58a6ff;
+  border: 1px solid #1f4068;
+  border-radius: 3px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.handover-viewer .report-viewer {
+  flex: 1;
+  min-height: 0;
+}
+
 /* ---------- Modal ---------- */
 .modal-backdrop {
   position: fixed;

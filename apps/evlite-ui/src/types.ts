@@ -74,3 +74,19 @@ export type SnapshotResult = {
     skipped: number;
   };
 };
+
+export type HandoverNode = EvidenceNode & {
+  must_read?: string[];
+  next_actions?: string[];
+  created_at?: string;
+};
+
+export type HandoverCreateInput = {
+  name: string;
+  output?: string;
+};
+
+export type HandoverCreateResult = {
+  path: string;
+  evId: string;
+};

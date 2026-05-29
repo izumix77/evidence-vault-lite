@@ -62,6 +62,42 @@ export const EVReportSchema = z.object({
   tags:          z.array(z.string()).optional(),
 });
 
+export const HandoverReportSchema = z.object({
+  id:           z.string(),
+  type:         z.literal("handover"),
+  title:        z.string(),
+  created_at:   z.string(),
+  updated_at:   z.string().optional(),
+
+  goal:          z.string(),
+  current_state: z.string(),
+  next_actions:  z.array(z.string()).default([]),
+
+  must_read:     z.array(z.string()).default([]),
+  optional_read: z.array(z.string()).optional(),
+
+  active_decisions:     z.array(z.string()).optional(),
+  unresolved_questions: z.array(z.string()).optional(),
+  known_risks:          z.array(z.string()).optional(),
+
+  related_packs: z.array(z.string()).optional(),
+  related_docs:  z.array(z.string()).optional(),
+
+  status:        EvidenceStatusSchema,
+  supersedes:    z.array(z.string()).optional(),
+  superseded_by: z.array(z.string()).optional(),
+  tags:          z.array(z.string()).optional(),
+
+  metadata: z
+    .object({
+      reference_count:    z.number().optional(),
+      last_referenced_at: z.string().optional(),
+      generated_by:       z.string().optional(),
+      generated_at:       z.string().optional(),
+    })
+    .optional(),
+});
+
 export const ContextPackSchema = z.object({
   id:         z.string(),
   goal:       z.string(),
