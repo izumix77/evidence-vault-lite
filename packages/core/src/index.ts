@@ -12,4 +12,5 @@ export * from "./affected.js";
 export * from "./favorites.js";
 export * from "./settings.js";
 export * from "./deriveTags.js";
+export * from "./importance-report.js";
 export * from "@ev-lite/shared";

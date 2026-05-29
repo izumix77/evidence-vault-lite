@@ -6,8 +6,12 @@ import {
   listPackIds,
   readPackConfig,
   findAffected,
+  buildImportanceReport,
+  buildRiskReport,
+  type ContextPack,
   type EvidenceStatus,
   type EvidenceNode,
+  type ImportanceRow,
 } from "@ev-lite/core";
 
 export type ValidateOptions = {
@@ -18,6 +22,8 @@ export type ValidateOptions = {
   showOrphans?: boolean;
   showDepends?: boolean;
   showCycles?: boolean;
+  showImportance?: boolean;
+  showRisk?: boolean;
   output?: string;
   focus?: string;
   focusDir?: string;
@@ -28,6 +34,17 @@ export type ValidateOptions = {
 
 function pad(s: string, width: number): string {
   return s.length >= width ? s : s + " ".repeat(width - s.length);
+}
+
+function padNumber(n: number, width: number): string {
+  const s = String(n);
+  return s.length >= width ? s : " ".repeat(width - s.length) + s;
+}
+
+function renderImportanceRow(row: ImportanceRow, evIdWidth: number): string {
+  const tagSuffix =
+    row.usageTags.length > 0 ? `   ${row.usageTags.join(" ")}` : "";
+  return `  ${pad(row.evId, evIdWidth)}  refs: ${padNumber(row.referenceCount, 2)}  packs: ${row.packDependencyCount}${tagSuffix}`;
 }
 
 async function runAffected(
@@ -491,6 +508,85 @@ export async function runValidate(options: ValidateOptions): Promise<void> {
         log(`    related     → ${id}`);
       for (const id of targetNode.supersedes)
         log(`    supersedes  → ${id}`);
+    }
+  }
+
+  if (options.showImportance) {
+    const report = buildImportanceReport(registry);
+    log("");
+    log("─── IMPORTANCE REPORT ──────────────────────────────");
+    log("");
+    log("TOP REFERENCED");
+    if (report.topReferenced.length === 0) {
+      log("  (none)");
+    } else {
+      const evIdWidth = Math.max(
+        ...report.topReferenced.map((r) => r.evId.length),
+      );
+      for (const row of report.topReferenced) {
+        log(renderImportanceRow(row, evIdWidth));
+      }
+    }
+    log("");
+    log("MOST PACK-DEPENDENT");
+    if (report.topPackDependent.length === 0) {
+      log("  (none)");
+    } else {
+      const evIdWidth = Math.max(
+        ...report.topPackDependent.map((r) => r.evId.length),
+      );
+      for (const row of report.topPackDependent) {
+        log(`  ${pad(row.evId, evIdWidth)}  packs: ${row.packDependencyCount}`);
+      }
+    }
+    log("");
+    log("COLD (unreferenced)");
+    if (report.cold.length === 0) {
+      log("  (none)");
+    } else {
+      for (const id of report.cold) log(`  ${id}`);
+    }
+  }
+
+  if (options.showRisk) {
+    const packs: ContextPack[] = [];
+    for (const pid of packIds) {
+      try {
+        packs.push(await readPackConfig(root, pid));
+      } catch {
+        // silent skip — malformed pack already warned above
+      }
+    }
+    const report = buildRiskReport(registry, packs);
+    log("");
+    log("─── RISK SIGNALS ───────────────────────────────────");
+
+    if (report.orphan.length > 0) {
+      log("");
+      log("ORPHAN (not referenced by any pack or node)");
+      for (const id of report.orphan) log(`  ${id}`);
+    }
+    if (report.stale.length > 0) {
+      log("");
+      log("STALE (explicitly marked stale)");
+      for (const id of report.stale) log(`  ${id}`);
+    }
+    if (report.superseded.length > 0) {
+      log("");
+      log("SUPERSEDED (replaced by newer artifact)");
+      for (const id of report.superseded) log(`  ${id}`);
+    }
+    if (report.cold.length > 0) {
+      log("");
+      log("COLD (active but unreferenced)");
+      for (const id of report.cold) log(`  ${id}`);
+    }
+    if (report.staleDependencies.length > 0) {
+      log("");
+      log("STALE DEPENDENCY");
+      for (const sd of report.staleDependencies) {
+        log(`  ${sd.source} → ${sd.target} (${sd.targetTag})`);
+      }
     }
   }
 

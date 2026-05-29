@@ -68,6 +68,14 @@ program
     "--show-cycles",
     "detect circular dependencies in depends_on / supersedes",
   )
+  .option(
+    "--show-importance",
+    "print TOP REFERENCED / MOST PACK-DEPENDENT / COLD report",
+  )
+  .option(
+    "--show-risk",
+    "print ORPHAN / STALE / SUPERSEDED / COLD / STALE DEPENDENCY signals",
+  )
   .option("--output <path>", "save validate output to a file")
   .option("--focus <ev_id>", "show all info for the specified ev_id")
   .option(
@@ -92,6 +100,8 @@ program
       showOrphans?: boolean;
       showDepends?: boolean;
       showCycles?: boolean;
+      showImportance?: boolean;
+      showRisk?: boolean;
       output?: string;
       focus?: string;
       focusDir?: string;
@@ -107,6 +117,8 @@ program
         showOrphans: opts.showOrphans,
         showDepends: opts.showDepends,
         showCycles: opts.showCycles,
+        showImportance: opts.showImportance,
+        showRisk: opts.showRisk,
         output: opts.output,
         focus: opts.focus,
         focusDir: opts.focusDir,

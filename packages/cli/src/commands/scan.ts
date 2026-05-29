@@ -1,11 +1,6 @@
 import path from "node:path";
 import pc from "picocolors";
-import {
-  scanFiles,
-  parseFile,
-  buildRegistry,
-  saveRegistry,
-} from "@ev-lite/core";
+import { scanRepo, saveRegistry } from "@ev-lite/core";
 
 export type ScanOptions = {
   root?: string;
@@ -17,14 +12,14 @@ export async function runScan(options: ScanOptions): Promise<void> {
   const output =
     options.output ?? path.join(root, ".ev-lite", "registry.json");
 
-  const files = await scanFiles(root);
-  const nodes = await Promise.all(files.map((f) => parseFile(root, f)));
-  const frontmatterCount = nodes.filter((n) => n.ev_id !== null).length;
-
-  const registry = buildRegistry(root, nodes);
+  const registry = await scanRepo(root);
   await saveRegistry(output, registry);
 
-  console.log(pc.green("✔"), `Scanned ${files.length} files`);
+  const frontmatterCount = registry.nodes.filter(
+    (n) => n.ev_id !== null,
+  ).length;
+
+  console.log(pc.green("✔"), `Scanned ${registry.nodes.length} files`);
   console.log(pc.green("✔"), `${frontmatterCount} frontmatter blocks found`);
   console.log(pc.green("✔"), `registry.json generated → ${output}`);
 }
