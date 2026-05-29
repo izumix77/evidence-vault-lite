@@ -31,7 +31,11 @@ export const DerivedTagSchema = z.enum([
 ]);
 
 export const ImportanceSchema = z.object({
-  reference_count: z.number().optional(),
+  explicit_priority:      z.number().min(0).max(1).optional(),
+  reference_count:        z.number().optional(),
+  pack_dependency_count:  z.number().optional(),
+  recent_reference_count: z.number().optional(),
+  last_referenced_at:     z.string().optional(),
 });
 
 export const EvidenceNodeSchema = z.object({

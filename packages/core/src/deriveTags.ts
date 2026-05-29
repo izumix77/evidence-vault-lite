@@ -47,14 +47,17 @@ export function deriveTags(
     if (!tags.includes("SUPERSEDED")) tags.push("SUPERSEDED");
   }
 
-  // Usage — only if importance present (populated by P9-b)
+  // Usage — only if importance present
   const imp = node.importance;
   if (imp) {
     const refCount = imp.reference_count ?? 0;
+    const packDepCount = imp.pack_dependency_count ?? 0;
     if (refCount >= 10) tags.push("CORE");
     if (docDate && daysSince(docDate, now) >= 365 && refCount >= 10) {
       tags.push("FOUNDATIONAL");
     }
+    if (packDepCount >= 3) tags.push("HOT");
+    if (refCount === 0 && packDepCount === 0) tags.push("COLD");
   }
 
   return tags;

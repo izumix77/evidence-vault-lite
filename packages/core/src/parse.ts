@@ -38,11 +38,22 @@ function asDateString(value: unknown): string | undefined {
 function parseImportance(value: unknown): Importance | undefined {
   if (!value || typeof value !== "object") return undefined;
   const obj = value as Record<string, unknown>;
-  const refCount = obj.reference_count;
-  if (typeof refCount === "number") {
-    return { reference_count: refCount };
+  const result: Importance = {};
+  if (typeof obj.explicit_priority === "number") {
+    result.explicit_priority = obj.explicit_priority;
   }
-  return undefined;
+  if (typeof obj.reference_count === "number") {
+    result.reference_count = obj.reference_count;
+  }
+  if (typeof obj.pack_dependency_count === "number") {
+    result.pack_dependency_count = obj.pack_dependency_count;
+  }
+  if (typeof obj.recent_reference_count === "number") {
+    result.recent_reference_count = obj.recent_reference_count;
+  }
+  const lastRef = asDateString(obj.last_referenced_at);
+  if (lastRef) result.last_referenced_at = lastRef;
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 function toPosix(p: string): string {
