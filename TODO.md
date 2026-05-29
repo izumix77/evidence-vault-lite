@@ -368,6 +368,9 @@ Claude に「このタスクの pack を JSON で作って」と依頼
 | ✅ P9-c | validate `--show-importance` / RiskSignal 出力 | core / cli | M |
 | ✅ P9-d | Metadata Editor DerivedTag バッジ | ui | S |
 | ✅ P9-e | `GET /api/dirs` + Directory Browser UI | server / ui | M |
+| ✅ P7-debt | handover frontmatter テンプレートを `@ev-lite/shared` に切り出す | shared / cli / server | XS |
+| ✅ P8-debt | `related: []` 保存時の空配列 vs 省略を統一（server 側で正規化） | server | XS |
+| ✅ P9-debt | COLD / ORPHAN の語義をコメントで明示分離 | core | XS |
 | ⬜ — | ObserverAI への RiskSignal パイプライン | Phase 5 | L |
 | ✅ | snapshot --deps（依存追跡モード） | shared / core / cli / ui / server | M |
 | ✅ | snapshot --deps --dry-run / --json（machine-readable contract）| shared / core / cli | S |
