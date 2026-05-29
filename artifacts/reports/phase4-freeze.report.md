@@ -80,7 +80,7 @@ tags:
 - Metadata Editor DerivedTag バッジ
 - File list sort（Name / Status / Scan order）
 
-## What Changed (実装先行)
+## Architectural Evolution (実装先行)
 
 Constitution v0.5 の範囲を超えて実装が先行した箇所：
 
