@@ -4,7 +4,6 @@ stack: docs
 status: active
 tags:
   - GETTING_STARTED
-  - ja
 depends_on: []
 related:
   - 'ev:evidence-vault-lite.README'
@@ -12,532 +11,325 @@ related:
 supersedes: []
 ---
 
-# EvidenceVault Lite — Getting Started Guide
+# EVLite はじめに
 
-> AIに必要な文脈だけを、構造的に渡す
+> Deliver only the context AI needs — through human-defined structure.
 
----
+このガイドは現時点（Phase 4 完了）の EVLite が備えている全機能を順に追います：scan、UI の 6 タブ、snapshot、Context Pack、Report、Handover、validate スイート。最後に実際の AI ネイティブ開発ループを 1 例として示します。
 
-## 概要
-
-EvidenceVault Lite は、既存の markdown ドキュメントに frontmatter を付けて
-**AI に渡す Context Pack（pack.md）を生成するツール**です。
-
-Graph-RAG ではありません。
-「何を読ませるか」を人間が定義する **Canonical Context Routing** です。
+前提: Node.js 22+ / pnpm 10+ / Git。
 
 ---
 
-## 前提条件
+## 1. インストールと最初の scan
 
-- Node.js 22+
-- pnpm 10+
-- Git
+ソースからビルドします（`npm publish` 未対応のため）。`evlite` コマンドはシムを作成して利用します。
 
----
-
-## Step 1: セットアップ
-
-### リポジトリをクローン・ビルド
-
-```bash
+```powershell
 git clone https://github.com/izumix77/evidence-vault-lite
 cd evidence-vault-lite
 pnpm install
 pnpm build
 ```
 
-### コマンドを使えるようにする（Windows PowerShell）
-
-グローバルインストールは `workspace:*` 依存の制約で動作しないため、
-PowerShell Profile に function を追加します。
+**Windows / PowerShell** — プロファイルに関数を追加:
 
 ```powershell
-# Profile を開く
 notepad $PROFILE
-```
-
-以下を追記して保存：
-
-```powershell
+# 以下を追記（パスは置き換えてください）:
 function evlite { node "C:\path\to\evidence-vault-lite\packages\cli\dist\index.js" @args }
+. $PROFILE
+evlite --version   # → 0.1.0
 ```
 
-Profile を再読み込み：
+**macOS / Linux:**
+
+```bash
+alias evlite='node /path/to/evidence-vault-lite/packages/cli/dist/index.js'
+```
+
+リポジトリを index して UI を開きます:
 
 ```powershell
-. $PROFILE
-evlite --version   # 0.1.0 が表示されれば OK
-```
-
-### コマンドを使えるようにする（macOS / Linux）
-
-```bash
-# ~/.bashrc または ~/.zshrc に追記
-alias evlite="node /path/to/evidence-vault-lite/packages/cli/dist/index.js"
-```
-
----
-
-## Step 2: 既存 repo に導入する
-
-対象 repo に移動して scan します。
-
-```bash
-cd /path/to/your-repo
+cd your-repo
 evlite scan
-```
+# ✔ Scanned 83 files
+# ✔ 2 frontmatter blocks found
+# ✔ registry.json generated → .ev-lite/registry.json
 
-出力例：
-```
-✔ Scanned 83 files
-✔ 2 frontmatter blocks found
-✔ registry.json generated → .ev-lite/registry.json
-```
-
-`.ev-lite/registry.json` に全 markdown ファイルのインデックスが生成されます。
-
----
-
-## Step 3: UI を起動する
-
-```bash
-evlite ui --root /path/to/your-repo
-```
-
-出力例：
-```
-✔ EvidenceVault Lite UI
-✔ Serving: http://localhost:3137
-✔ Root: /path/to/your-repo
-```
-
-ブラウザで `http://localhost:3137` が自動で開きます。
-
-> ポートが使用中の場合：
-> ```powershell
-> # Windows
-> Get-NetTCPConnection -LocalPort 3137 | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
-> ```
-
----
-
-## Step 4: 全ファイルに frontmatter を一括挿入する
-
-UI を開くと大量のファイルが `No Metadata` セクションに並びます。
-`evlite init-meta` で一括挿入できます。
-
-```bash
-# Linux / macOS
-find . -name "*.md" | xargs -I{} evlite init-meta {}
-
-# Windows PowerShell
-Get-ChildItem -Recurse -Filter "*.md" | ForEach-Object {
-    evlite init-meta $_.FullName
-}
-```
-
-出力例：
-```
-✔ frontmatter inserted → docs/README.md
-✔ frontmatter inserted → docs/architecture.md
-WARN: frontmatter already exists in docs/GLOSSARY.md — skipped
-```
-
-挿入される frontmatter：
-
-```yaml
----
-ev_id: ev:docs.README        ← ファイル名から自動推定
-stack: docs                  ← ディレクトリ名から推定
-status: draft
-tags: []
-depends_on: []
-related: []
-supersedes: []
----
-```
-
-その後 `evlite scan` で registry を更新：
-
-```bash
-evlite scan
-```
-
-UI をリロードすると全ファイルが `With Metadata` に移動します。
-
----
-
-## Step 5: UI で frontmatter を編集する
-
-### ファイル一覧
-
-左ペインにファイルが **stack / ディレクトリ別にグループ化**されて表示されます。
-
-```
-▼ WITH METADATA (83)
-  ▼ dgc (12)
-      ev:dgc.constitution — Constitution.md
-      ev:dgc.types — types.md
-  ▼ traceos (8)
-      ev:traceos.constitution — CONSTITUTION.md
-▼ NO METADATA (0)
-```
-
-グループ名・セクション名をクリックで折りたたみ/展開できます。
-
-### Metadata Editor
-
-ファイルをクリックすると右ペインに Metadata Editor が表示されます。
-
-| フィールド | 意味 | 例 |
-|---|---|---|
-| `ev_id` | グローバル一意 ID | `ev:dgc.constitution` |
-| `stack` | 所属スタック | `dgc` |
-| `status` | 有効状態 | `active` |
-| `tags` | 検索・分類タグ | `core, spec` |
-| `depends_on` | 前提となる文書 | `ev:dgc.constitution` |
-| `related` | 関連文書 | `ev:dgc.types` |
-| `supersedes` | 旧バージョンの置換 | `ev:dgc.constitution-v0-1` |
-
-**フィールドの使い分け：**
-
-```
-depends_on = これを読まないと理解できない（前提）
-related    = 関連している（参考）
-supersedes = 旧バージョンを置き換える
-```
-
-`depends_on` / `related` / `supersedes` の入力欄では
-`ev:` と打つと registry 内の ev_id が候補として表示されます。
-
-**[ Save Metadata ]** をクリックすると .md ファイルの frontmatter が更新されます。
-
-### 重要なファイルは status を active に
-
-```yaml
-status: active   ← Context Pack に含める（重要文書）
-status: draft    ← 草案（明示指定時のみ含める）
-status: archived ← 履歴保管（含めない）
-```
-
----
-
-## Step 6: コードを snapshot する
-
-仕様書だけでなく、**コードそのものも AI に渡せます**。
-
-```bash
-evlite snapshot packages/core/src --stack dgc
-```
-
-出力例：
-```
-✔ Scanned 9 files
-✔ snapshot.md generated → .ev-lite/snapshots/src.md
-✔ ev_id: ev:dgc.snapshot-src
-```
-
-生成される snapshot.md の構造：
-
-```md
-# Directory: packages/core/src
-
-## Tree
-packages/core/src/
-  index.ts
-  apply.ts
-  types.ts
-  ...
-
----
-
-## index.ts
-\`\`\`ts
-// ファイル内容
-\`\`\`
-
-## apply.ts
-\`\`\`ts
-// ファイル内容
-\`\`\`
-```
-
-**UI から snapshot を生成することもできます：**
-Snapshot タブ → path を入力 → [ Generate Snapshot ]
-
-> snapshot は転送用アーティファクトです。
-> `source files are canonical. snapshot is an AI transfer artifact.`
-
-snapshot 生成後は `evlite scan` で registry に登録します：
-
-```bash
-evlite scan
-```
-
-### 依存追跡モード：import グラフで snapshot する
-
-エントリーポイントから実際に到達できるファイルだけを snapshot するには `--deps` を使います：
-
-```bash
-evlite snapshot packages/core/src/index.ts --deps --stack dgc
-```
-
-出力例：
-```
-✔ Resolved 12 files (17 edges)
-✔ Skipped 31 imports
-✔ snapshot.md generated → .ev-lite/snapshots/index.md
-✔ ev_id: ev:dgc.snapshot-index
-```
-
-生成される snapshot.md には以下の3セクションが追加されます：
-
-- **Dependency Scope** — サマリーテーブル（ファイル数・エッジ数・スキップ数）
-- **Dependency Tree** — import グラフのビジュアルツリー（共有依存は `(visited)` でマーク）
-- **Skipped Imports** — 追跡しなかった import の一覧と理由（`external` / `alias` / `missing` など）
-
-このモードは**静的な相対 import**（`./` と `../`）のみを追跡します。
-`node_modules` やワークスペースエイリアス（例: `@ev-lite/shared`）はスキップとして記録されます（サイレントに無視されません）。
-
-> **`--deps` とディレクトリ snapshot の使い分け：**
-> - ディレクトリ snapshot：フォルダ内のファイルをまとめて渡したい
-> - `--deps`：エントリーポイントが実際に使っているファイルだけを渡したい
-
-### Agent コンテキストのコンパイル
-
-dependency snapshot と pack を1コマンドで生成するには：
-
-```bash
-evlite context packages/core/src/index.ts --goal "implement --output option" --stack evlite
-```
-
-出力例：
-```
-✔ snapshot.md generated  → .ev-lite/snapshots/index.md
-✔ ev_id                  → ev:evlite.snapshot-index
-✔ pack.json saved        → .ev-lite/packs/context-index-20260527T103000.json
-✔ pack.md generated      → .ev-lite/packs/context-index-20260527T103000.md
-✔ pack_id                → pack:context-index-20260527T103000
-```
-
-ファイルを書かずに内容を確認するには：
-
-```bash
-evlite context packages/core/src/index.ts --goal "..." --dry-run
-```
-
-ファイル変更による影響範囲を調べるには：
-
-```bash
-evlite validate --affected packages/core/src/snapshot.ts
-```
-
----
-
-## Step 7: Context Pack を作る
-
-### pack.json を作成する
-
-UI の **Pack Builder タブ** を開きます。
-
-| フィールド | 意味 |
-|---|---|
-| `id` | pack の識別子（`pack:my-pack`、作成後は変更不可） |
-| `goal` | AI に何をしてほしいか |
-| `mustRead` | AI に必ず読ませる文書の ev_id リスト |
-| `doNotInfer` | AI に推論させてはいけないこと |
-| `outputGoal` | AI に期待する出力 |
-
-例：
-
-```json
-{
-  "id": "pack:glassbox-overview",
-  "goal": "Understand GlassBox architecture and design principles",
-  "mustRead": [
-    "ev:glassbox.readme",
-    "ev:glassbox.readme-ja",
-    "ev:glassbox.todo"
-  ],
-  "doNotInfer": [
-    "Do not assume implementation details not in the docs"
-  ],
-  "outputGoal": [
-    "Explain GlassBox's core concepts",
-    "Identify dependencies on DGC/TraceOS"
-  ]
-}
-```
-
-**[ Save Pack ]** で `.ev-lite/packs/glassbox-overview.json` に保存されます。
-
-### pack.md を生成する
-
-**[ Generate pack.md ]** をクリックするとプレビューが表示されます。
-右上の **[ Copy ]** ボタンでクリップボードにコピーできます。
-
-CLI からも生成できます：
-
-```bash
-evlite pack glassbox-overview
-# → .ev-lite/packs/glassbox-overview.md
-```
-
----
-
-## Step 8: pack.md を AI に渡す
-
-生成した pack.md を ChatGPT / Claude Project に貼り付けるだけです。
-
-```
-# Context Pack — Understand GlassBox architecture and design principles
-
-> Generated by EvidenceVault Lite 0.1.0
-> Pack ID: pack:glassbox-overview
-
-## Scope
-Understand GlassBox architecture and design principles
-
-## Output Goal
-- Explain GlassBox's core concepts
-
-## Do Not Infer
-- Do not assume implementation details not in the docs
-
----
-
-## Context
-
-### GlassBox README
-...（ファイル内容）
-```
-
-AI は `goal` / `outputGoal` / `doNotInfer` を指示として読み、
-`mustRead` のコンテンツを文脈として理解します。
-
----
-
-## CLI リファレンス
-
-| コマンド | 説明 |
-|---|---|
-| `evlite scan` | repo をスキャン → `registry.json` 生成 |
-| `evlite snapshot <path>` | コードを snapshot → `snapshot.md` 生成 |
-| `evlite pack <pack-id>` | `pack.json` から `pack.md` 生成 |
-| `evlite init-meta <file>` | frontmatter ブロックを挿入 |
-| `evlite validate` | 依存関係・参照の整合性チェック |
-| `evlite context <entrypoint>` | Agent コンテキストをコンパイル: deps snapshot + pack を1コマンドで生成 |
-| `evlite report <name>` | EVReport のスキャフォールドを生成 |
-| `evlite ui` | ローカル UI 起動 → `localhost:3137` |
-
-### snapshot オプション
-
-| オプション | 説明 |
-|---|---|
-| `--stack <stack>` | frontmatter の stack 値 |
-| `--output <path>` | 出力ファイルパス |
-| `--include <glob>` | 対象ファイルパターン（複数指定可） |
-| `--exclude <glob>` | 除外パターン（複数指定可） |
-| `--no-content` | tree のみ（コード内容を含めない） |
-| `--deps` | エントリーポイントから import/export 依存を追跡 |
-| `--max-depth <n>` | 最大追跡深度（デフォルト: `10`） |
-| `--include-tests` | `.spec.ts` / `.test.ts` を追跡対象に含める |
-| `--no-dep-tree` | Dependency Tree セクションを省略 |
-| `--dry-run` | snapshot.md を書かずに依存グラフを解決して表示 |
-| `--json` | DepGraph を JSON で stdout に出力（machine-readable contract） |
-
-### validate オプション
-
-| オプション | 説明 |
-|---|---|
-| `--strict` | ERROR があれば exit 1 |
-| `--show-chains` | supersedes チェーンを表示 |
-| `--show-impact <ev_id>` | 指定 ev_id を参照している docs/packs を逆引き |
-| `--show-orphans` | どの doc/pack からも参照されていない node を一覧 |
-| `--show-depends` | depends_on / related / supersedes の構造を表示 |
-| `--show-cycles` | 循環依存を検出 |
-| `--active-only` | `--show-depends` と併用: superseded な related をスキップ |
-| `--focus <ev_id>` | 指定 ev_id の全情報を一括表示 |
-| `--focus-dir <path>` | 指定フォルダ内の全 node 情報を一括表示 |
-| `--output <path>` | validate の出力をファイルに保存 |
-| `--affected <file>` | source file の変更で影響を受ける snapshot / pack を逆引き |
-| `--json` | `--affected` の結果を JSON で出力（`--affected` と併用） |
-
-### report オプション
-
-| オプション | 説明 |
-|---|---|
-| `--kind <kind>` | レポート種別: `implementation` / `analysis` / `architecture` / `research` / `incident` / `observer` / `retrospective`（デフォルト: `implementation`） |
-| `--stack <stack>` | frontmatter の stack 値（デフォルト: `docs`） |
-| `--output <path>` | 出力ファイルパス（デフォルト: `artifacts/reports/<name>.report.md`） |
-
-### ui オプション
-
-| オプション | 説明 |
-|---|---|
-| `--root <path>` | 対象ディレクトリ |
-| `--port <port>` | ポート番号（デフォルト: `3137`） |
-
-> repo ごとにデフォルトポートを設定する場合は `.ev-lite/settings.json` を作成：
-> ```json
-> { "port": 3138, "description": "my-repo — 参照用 UI" }
-> ```
-
----
-
-## よくあるパターン
-
-### 複数 repo をまたいで相談したい
-
-専用ドキュメント repo を作成して各 repo の docs を集めます：
-
-```
-dgc-ecosystem-docs/
-  dgc_docs/
-  traceos_docs/
-  burnscope_docs/
-  ...
-```
-
-```bash
-cd dgc-ecosystem-docs
-evlite scan
 evlite ui
+# ✔ Serving: http://localhost:3137
 ```
 
-### 依存関係を整合性チェックしたい
+`evlite scan` は `.ev-lite/registry.json` を生成します。各 `EvidenceNode` には frontmatter 由来のメタデータに加えて、scan 時に集計された `importance`（`reference_count`、`pack_dependency_count`）と `derived_tags`（`NEW` / `OLD` / `CORE` / `COLD` / `SUPERSEDED` など）が格納されます。UI はこのファイルを読み込むだけで、ソース markdown には**一切書き戻しません**。
+
+---
+
+## 2. frontmatter を付ける
+
+EVLite は各 `.md` の YAML frontmatter からメタデータを読み取ります:
+
+```yaml
+---
+ev_id: ev:stack.document-name   # グローバルに一意な ID（"ev:" + ドット区切り）
+stack: docs                     # 所属 stack（通常は親ディレクトリ名）
+status: active                  # active | draft | experimental | deprecated | archived | superseded | stale
+tags: [core, spec]
+depends_on: [ev:other.prereq]   # この文書なしでは理解できない前提
+related:    [ev:other.context]  # 関連文書（必須ではない）
+supersedes: [ev:old.version]    # 旧版を置き換える
+---
+```
+
+frontmatter がないファイルに draft ブロックを挿入:
+
+```powershell
+evlite init-meta docs/architecture.md
+```
+
+リポジトリ全体に一括挿入:
+
+```powershell
+# PowerShell
+Get-ChildItem -Recurse -Filter "*.md" | ForEach-Object {
+  evlite init-meta $_.FullName
+}
+```
 
 ```bash
-evlite validate
+# bash / zsh
+find . -name "*.md" | xargs -I{} evlite init-meta {}
 ```
 
-```
-WARN: ev:burnscope.mvp depends_on missing → ev:traceid.phase1
-ERROR: duplicate ev_id → ev:traceid.phase1 (2 files)
-```
+frontmatter を編集・挿入したら `evlite scan`（または UI の **Scan ▶** ボタン）で registry を更新します。
 
-### .gitignore の推奨設定
+---
 
-```
-# .ev-lite/ はすべて除外（個人の環境情報が含まれるため）
-.ev-lite/
+## 3. リポジトリを俯瞰する — `Dirs` タブ
+
+UI の **Dirs** タブはリポジトリのツリービューです。各行に直下の `.md` ファイル数が表示され、`▶` で遅延展開します（ディレクトリごとに 1 回だけサーバ呼び出し）。
+
+ディレクトリを選択すると右ペインに直下のファイル一覧が表示されます:
+
+- `ev_id` と相対パス
+- 明示的な `status` バッジ（`active` / `draft` …）
+- scan が付与した **DerivedTag** すべて
+
+DerivedTag は成果物の健康状態を一目で示します:
+
+| Tag | 意味 |
+|---|---|
+| `NEW` / `RECENT` / `OLD` | `updated_at` から導出される鮮度（≤30日 / ≤90日 / ≥365日） |
+| `STALE` | `status: stale` が明示されている |
+| `SUPERSEDED` | `status: superseded` または他ノードの `supersedes:` に登場 |
+| `ACTIVE` / `ARCHIVED` / `EXPERIMENTAL` | `status` から導出されるライフサイクル |
+| `CORE` | `reference_count ≥ 10`（他から多く参照されている） |
+| `HOT` | `pack_dependency_count ≥ 3`（多くの pack に含まれる） |
+| `FOUNDATIONAL` | `CORE` かつ `OLD` — 長期間使われ続けている基盤文書 |
+| `COLD` | 参照ゼロ、pack 依存ゼロ |
+
+ディレクトリ行から 2 種類の遷移ができます:
+
+- **ファイルクリック** → **Metadata Editor** タブに切り替わり、対象ファイルが選択された状態になります。
+- **→ Snapshot** → **Snapshot** タブに切り替わり、`path` フォームにディレクトリパスが入力済みになります。
+
+---
+
+## 4. Context Pack を作る — `Pack Builder` タブ
+
+**Context Pack** とは AI に渡す構造化プロンプトです。読むべき文書、推論してはいけない事項、出力の形を指定します。pack は `.ev-lite/packs/<name>.json` に保存され、必要に応じて `pack.md` にレンダリングされます。
+
+1. **Pack Builder → New** でフォームを開きます:
+   - `id` — `pack:<name>`（保存後は不変）
+   - `goal` — AI に達成してほしいこと
+   - `mustRead[]` — 必読文書の `ev_id`
+   - `doNotInfer[]` — 推論で勝手に補ってほしくない事項
+   - `outputGoal[]` — 期待する出力の形
+2. `mustRead` の入力は手打ち以外に 2 つの補助があります:
+   - **[ + Add from registry ]** — 全 `ev_id` ノードから検索・複数選択。重複は自動で除外。
+   - **[ + From report/handover ]** — 全 `EVReport` と `HandoverReport` を一覧表示。行を展開すると候補 ev_id（report の `required_packs_for_continuation`、handover の `must_read`）が表示され、まとめてチェック → 追加できます。
+3. **Related** セクション（Phase 4 で追加）には `ev_id` または `pack:` で始まる関連リンクを `mustRead` を汚さずに紐付けられます。同じピッカーを使います。
+4. **Save Pack** → **Generate pack.md** で markdown を生成。**Copy** ボタンで Claude / ChatGPT に貼り付けます。
+
+**AI が生成した pack JSON のインポート:** **[ Import JSON ]** ボタン → ContextPack JSON をペースト。`ContextPackSchema`（zod）で検証してから保存します。エラーはフィールドごとにモーダル内に表示されます。
+
+CLI から生成:
+
+```powershell
+evlite pack my-pack            # → .ev-lite/packs/my-pack.md
 ```
 
 ---
 
-## Philosophy
+## 5. コードスナップショットを生成する
 
+snapshot は **AI 転送用の成果物**であり、source of truth ではありません。ディレクトリや import グラフを 1 つの `snapshot.md` にまとめます。
+
+**ディレクトリスナップショット**（パス配下を全部）:
+
+```powershell
+evlite snapshot packages/core/src --stack core
 ```
-EvidenceVault Lite does not search for relevance.
-EvidenceVault Lite routes context by human-defined structure.
 
-Not Graph-RAG. Canonical Context Routing.
+**依存スナップショット**（`--deps` で entrypoint からの static import を辿る）:
 
-Truth about what to read emerges outside the system.
+```powershell
+evlite snapshot packages/core/src/index.ts --deps --max-depth 10
+# skip した import（alias / external / dynamic / missing）はレポートされます
 ```
+
+**一発生成 `evlite context`** — dep snapshot + その entrypoint を mustRead に含めた Context Pack を同時生成:
+
+```powershell
+evlite context packages/core/src/index.ts --goal "review for cycle bugs"
+# → snapshot.md  +  pack.json（snapshot を mustRead に登録済み）
+```
+
+UI の **Snapshot** タブは上記すべてのオプションに加えて、よく使うパスの **Favorites** を備えています。UI から生成すると自動的に `scan` も再実行されます。
+
+生成された snapshot は registry に `EvidenceNode` として登録されるため、pack の mustRead に `ev:<stack>.snapshot-<name>` として参照できます。
 
 ---
 
-_EvidenceVault Lite Getting Started Guide_
-_Apache 2.0_
+## 6. 実装記憶を残す — `Reports` タブ
+
+意味のある作業を区切るたびに EVReport を scaffold して、判断の根拠を次の AI セッションに渡せる形で残します:
+
+```powershell
+evlite report cycle-detection --kind implementation --stack core
+# → artifacts/reports/cycle-detection.report.md
+```
+
+生成される frontmatter には手で埋める構造化フィールドが並びます:
+
+- `goal` / `modified_areas` / `semantic_impact` / `architectural_consequences`
+- `remaining_risks` / `known_assumptions` / `unresolved_contradictions`
+- `required_packs_for_continuation` — **次の pack への橋渡し**
+- `suggested_next_actions` / `related_reports`
+
+**Reports** タブで一覧と詳細を確認できます。重要なのは `required_packs_for_continuation` で、これは Pack Builder の **[ + From report/handover ]** ピッカーが候補として表示する値そのものです。ループをコピペなしで閉じられます。
+
+---
+
+## 7. セッション間で引き継ぐ — `Handovers` タブ
+
+**HandoverReport** は EVReport より短く、*前回*ではなく*次回*セッションに向けた申し送りです:
+
+```powershell
+evlite handover my-session
+# → artifacts/handovers/my-session.handover.md
+```
+
+UI の **Handovers** タブの "New Handover" パネルからも CLI なしで作成できます。
+
+埋める内容:
+
+- `goal` — 次セッションのねらい
+- `current_state` — どこまで終わったか
+- `next_actions[]` — 具体的な次の手順
+- `must_read[]` — 開始前に読むべき `ev_id`
+- `optional_read[]` / `active_decisions[]` / `unresolved_questions[]` / `known_risks[]`
+
+`evlite scan` は handover を `EvidenceNode` として登録し、`must_read` を依存グラフに自動で取り込みます。再開時は Pack Builder で **[ + From report/handover ]** → 該当 handover を展開 → `must_read` をワンクリックで次の pack に追加できます。
+
+---
+
+## 8. リポジトリを検証する
+
+`evlite validate` は registry と pack を歩いて、壊れた参照を検出し健康指標を可視化します。フラグは自由に組み合わせ可能です。
+
+**ベースラインチェック**（常時実行）:
+
+- `ev_id` の重複
+- `depends_on` / `supersedes` の参照先欠落
+- `active` 文書が `deprecated` / `archived` を depends_on している
+- pack の `mustRead` に superseded ノードが含まれる
+
+**Importance シグナル** — 何が重要か?
+
+```powershell
+evlite validate --show-importance
+```
+
+```
+─── IMPORTANCE REPORT ──────────────────────────────
+
+TOP REFERENCED
+  ev:dgc.constitution     refs: 24  packs: 8   CORE FOUNDATIONAL
+  ev:traceos.spec         refs: 17  packs: 5   CORE
+
+MOST PACK-DEPENDENT
+  ev:dgc.constitution     packs: 8
+
+COLD (unreferenced)
+  ev:docs.old-design
+```
+
+**Risk シグナル** — 何が腐っているか?
+
+```powershell
+evlite validate --show-risk
+```
+
+```
+─── RISK SIGNALS ───────────────────────────────────
+
+ORPHAN (not referenced by any pack or node)
+  ev:internal.scratch-notes
+
+STALE (explicitly marked stale)
+  ev:traceid.phase1
+
+STALE DEPENDENCY
+  pack:impl-phase1 → ev:traceid.phase1 (STALE)
+```
+
+**ピンポイント調査:**
+
+```powershell
+evlite validate --show-impact ev:dgc.constitution   # この id を参照しているのは誰?
+evlite validate --focus ev:dgc.constitution         # 単一 ev_id の 1 ページサマリ
+evlite validate --focus-dir packages/core           # ディレクトリ全体に対して同じ
+evlite validate --affected packages/core/src/scan.ts --json
+                                                    # 逆引き: このファイル変更で
+                                                    # stale になった snapshot / pack
+```
+
+**ファイル出力:**
+
+```powershell
+evlite validate --show-importance --show-risk --output reports/validate.md
+```
+
+`--strict` はエラー時に `exit 1`。CI ゲートに組み込めます。
+
+---
+
+## 9. 典型的な AI ネイティブ開発ループ
+
+全部つなげるとこうなります:
+
+```
+1. evlite scan
+2. UI → Dirs タブ        ─ 健康状態を俯瞰: どこが CORE? どこが COLD?
+3. UI → Pack Builder    ─ New → [ + From report/handover ] で前回の must_read を取り込み
+                         → [ + Add from registry ] で周辺コンテキストを追加
+                         → Generate pack.md
+4. pack.md を Claude / ChatGPT に渡して作業を実行
+5. evlite report <name> ─ 何が変わったかを記録、required_packs_for_continuation を埋める
+6. evlite handover <name> ─ 明日のための must_read / next_actions をメモ
+7. evlite validate --show-risk --strict   (CI ゲート)
+   → STALE DEPENDENCY で superseded を指したままの pack を検出
+8. 次のセッション: ステップ 3 に戻る。report と handover は
+   ピッカーに既に並んでいるのでコピペ不要。
+```
+
+これが Document Context Routing System です。構造はあなたが決め、EVLite はそれを一貫した形に保ち続けます。
+
+---
+
+## さらに
+
+- Constitution v0.5（哲学 + `DerivedTag` / `ImportanceScore` / `RiskSignal` の完全な導出ルール）: [Constitution_v0_5.md](Constitution_v0_5.md)
+- 英語版: [GETTING_STARTED.md](GETTING_STARTED.md)
+- リポジトリ直下の README: [../README.md](../README.md)

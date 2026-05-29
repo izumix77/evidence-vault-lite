@@ -11,191 +11,93 @@ related:
 supersedes: []
 ---
 
-# EvidenceVault Lite
+# EvidenceVault Lite (evlite)
 
 > Deliver only the context AI needs — through human-defined structure.
 
-Document Context Routing System.
+Document Context Routing System for AI-native development. Not Graph-RAG. **Canonical Context Routing.**
 
-## Features
+## What it does
 
-- Repo scanning and indexing
-- `registry.json` generation
-- Context Pack generation (`pack.md`)
-- Code snapshot generation (`snapshot.md`)
-- Dependency-aware snapshot (`--deps`): traces static imports from an entrypoint
-- Markdown bundle output for AI tools
-- YAML frontmatter metadata support
-- Local web UI for metadata editing and pack building
+- Tag your `.md` files with frontmatter and let `evlite scan` build a queryable registry of your repo's evidence.
+- Bundle the exact files an AI needs into a **Context Pack** (`pack.md`) you control — `mustRead`, `doNotInfer`, `outputGoal`.
+- Read repo health at a glance via **DerivedTags** (`NEW` / `OLD` / `STALE` / `SUPERSEDED`) and **ImportanceScore** (`CORE` / `HOT` / `COLD` / `FOUNDATIONAL`).
+- Carry context across sessions with **EVReport** (implementation memory) and **HandoverReport** (session-to-session continuation).
 
-## Philosophy
+See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) (English) / [docs/GETTING_STARTED.ja.md](docs/GETTING_STARTED.ja.md) (日本語) for the full workflow.
 
-EvidenceVault Lite does not search for relevance.
-EvidenceVault Lite routes context by human-defined structure.
+## Install (Windows / PowerShell)
 
-Not Graph-RAG. Canonical Context Routing.
+`npm publish` is not yet available — build from source and shim `evlite`:
 
-Truth about what to read emerges outside the system.
-
-## Quick Start (Development)
-
-```bash
+```powershell
 git clone https://github.com/izumix77/evidence-vault-lite
 cd evidence-vault-lite
 pnpm install
 pnpm build
-node packages/cli/dist/index.js scan
-node packages/cli/dist/index.js ui
-```
 
-## Installation
-
-### Windows (PowerShell)
-
-Global install via pnpm is not supported due to `workspace:*` dependencies.
-Use a PowerShell function instead:
-
-1. Open your PowerShell profile:
-
-```powershell
+# Add to your PowerShell profile so `evlite` is callable from any repo
 notepad $PROFILE
-```
-
-2. Add the following line:
-
-```powershell
+# Append this line, replace the path:
 function evlite { node "C:\path\to\evidence-vault-lite\packages\cli\dist\index.js" @args }
-```
-
-3. Reload the profile:
-
-```powershell
 . $PROFILE
-```
-
-4. Verify:
-
-```powershell
 evlite --version
 ```
 
-### macOS / Linux
+macOS / Linux: alias instead, e.g. `alias evlite='node /path/to/evidence-vault-lite/packages/cli/dist/index.js'`.
 
-```bash
-# coming soon: npm publish
-```
+## Quick Start
 
-## Usage
-
-### Existing repo
-
-```bash
+```powershell
 cd your-repo
-
-# 1. scan existing markdown files
-evlite scan
-
-# 2. open UI → add frontmatter to key documents
-evlite ui
-
-# 3a. snapshot a directory as context
-evlite snapshot packages/core/src --stack my-stack
-
-# 3b. snapshot by dependency graph (traces imports from entrypoint)
-evlite snapshot packages/core/src/index.ts --deps --stack my-stack
-
-# 4. create a Context Pack
-evlite pack my-pack
-
-# 5. use pack.md with ChatGPT / Claude Project
+evlite scan                 # 1. index every .md → .ev-lite/registry.json
+evlite ui                   # 2. open http://localhost:3137
+# 3. (UI) Dirs tab → click a file → Metadata Editor → fill ev_id / status
+# 4. (UI) Pack Builder → New → [ + Add from registry ] → Save → Generate pack.md
+# 5. paste pack.md into your AI tool
 ```
 
-### Frontmatter format
-
-```yaml
----
-ev_id: ev:stack.document-name
-stack: your-stack
-status: active
-tags: [core, spec]
-depends_on: []
-related: []
-supersedes: []
----
-```
-
-## CLI
+## CLI Commands
 
 | Command | Description |
 |---|---|
-| `evlite scan` | scan repo → generate `registry.json` |
-| `evlite snapshot <path>` | generate code snapshot → `snapshot.md` |
-| `evlite pack <pack-id>` | generate `pack.md` from `pack.json` |
-| `evlite init-meta <file>` | insert frontmatter block |
-| `evlite validate` | check dependency and topology integrity |
-| `evlite report <name>` | generate an EVReport scaffold |
-| `evlite ui` | launch local UI → `localhost:3137` |
+| `evlite scan` | scan repo → write `.ev-lite/registry.json` (incl. `importance` + `derived_tags`) |
+| `evlite ui` | launch local UI → `http://localhost:3137` |
+| `evlite snapshot <path>` | bundle a directory (or import graph with `--deps`) into a `snapshot.md` |
+| `evlite context <entrypoint>` | one-shot: dep snapshot + Context Pack for a code entrypoint |
+| `evlite pack <id>` | render `pack.md` from a saved `pack.json` |
+| `evlite validate` | check registry integrity, topology, importance, and risk signals |
+| `evlite report <name>` | scaffold an `EVReport` (implementation memory) |
+| `evlite handover <name>` | scaffold a `HandoverReport` (next-session memo) |
+| `evlite init-meta <file>` | insert a draft frontmatter block into a `.md` |
 
-### validate options
+### `evlite validate` options
 
-| Option | Description |
+| Option | What it shows |
 |---|---|
-| `--strict` | exit 1 if any ERROR is found |
-| `--show-chains` | display supersedes chains derived from topology |
-| `--show-impact <ev_id>` | show all docs and packs referencing the given ev_id |
-| `--show-orphans` | list nodes not referenced by any doc or pack |
-| `--show-depends` | show depends_on / related / supersedes structure |
-| `--show-cycles` | detect circular dependencies |
-| `--active-only` | with `--show-depends`: skip superseded related nodes |
-| `--focus <ev_id>` | show all info for the specified ev_id |
-| `--focus-dir <path>` | show all info for nodes in the specified directory |
-| `--output <path>` | save validate output to a file |
+| `--show-impact <ev_id>` | every doc and pack that references this id |
+| `--show-orphans` | nodes not referenced anywhere |
+| `--show-depends` | full `depends_on` / `related` / `supersedes` adjacency |
+| `--show-cycles` | circular dependencies in `depends_on` / `supersedes` |
+| `--show-chains` | supersedes chains derived from topology |
+| `--show-importance` | TOP REFERENCED / MOST PACK-DEPENDENT / COLD |
+| `--show-risk` | ORPHAN / STALE / SUPERSEDED / COLD / STALE DEPENDENCY |
+| `--focus <ev_id>` | one-page summary for a single ev_id |
+| `--focus-dir <path>` | the same for every node in a directory |
+| `--affected <file>` | reverse lookup: which snapshots and packs are affected by a file change |
+| `--output <path>` | write the report to a file instead of stdout |
+| `--strict` | exit `1` on any ERROR |
 
-### snapshot options
+## UI Tabs
 
-| Option | Description |
+| Tab | What it's for |
 |---|---|
-| `--stack <stack>` | frontmatter stack value |
-| `--output <path>` | output file path |
-| `--include <glob>` | file patterns to include (repeatable) |
-| `--exclude <glob>` | file patterns to exclude (repeatable) |
-| `--no-content` | tree only, no file contents |
-| `--deps` | trace import/export dependencies from entrypoint |
-| `--max-depth <n>` | max traversal depth (default: `10`) |
-| `--include-tests` | include `.spec.ts` / `.test.ts` files |
-| `--no-dep-tree` | omit dependency tree section from output |
-
-### report options
-
-| Option | Description |
-|---|---|
-| `--kind <kind>` | report kind: `implementation` / `analysis` / `architecture` / `research` / `incident` / `observer` / `retrospective` (default: `implementation`) |
-| `--stack <stack>` | frontmatter stack value (default: `docs`) |
-| `--output <path>` | output file path (default: `artifacts/reports/<name>.report.md`) |
-
-### ui options
-
-| Option | Description |
-|---|---|
-| `--root <path>` | root directory to serve |
-| `--port <port>` | port number (default: `3137`) |
-
-> You can also set a default port per repo via `.ev-lite/settings.json`:
-> ```json
-> { "port": 3138, "description": "my-repo — reference UI" }
-> ```
-
-## Snapshot Semantics
-
-```
-snapshot is not source of truth.
-source files are canonical.
-snapshot is an AI transfer artifact.
-
-deps mode is a reachability snapshot, not a glob snapshot.
-Only files reachable from the entrypoint through supported static relative imports are included.
-Skipped imports MUST be reported, not silently ignored.
-```
+| **Metadata Editor** | edit frontmatter, see DerivedTag badges (`NEW` / `OLD` / `CORE` …) on the selected file |
+| **Pack Builder** | build Context Packs — registry picker, "From report/handover" Prompt Vault, JSON import, related artifacts |
+| **Snapshot** | generate code snapshots (`--deps` and favorites available from the UI) |
+| **Reports** | create + browse `EVReport` scaffolds |
+| **Handovers** | create + browse `HandoverReport` scaffolds (`must_read` count surfaced) |
+| **Dirs** | repo tree browser — directory drill-down, file health at a glance, jump to Metadata Editor or Snapshot tab |
 
 ## License
 

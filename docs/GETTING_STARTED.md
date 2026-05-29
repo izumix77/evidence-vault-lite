@@ -11,536 +11,325 @@ related:
 supersedes: []
 ---
 
-# EvidenceVault Lite — Getting Started Guide
+# Getting Started with EVLite
 
 > Deliver only the context AI needs — through human-defined structure.
 
----
+This guide walks through every feature that ships in EVLite today (Phase 4 complete): scanning, the UI's six tabs, snapshots, Context Packs, Reports, Handovers, and the validate suite — ending with a typical AI-native loop you can adopt.
 
-## Overview
-
-EvidenceVault Lite adds frontmatter to your existing markdown documents
-and generates **Context Packs (pack.md)** to pass structured context to AI tools.
-
-This is not Graph-RAG.
-It is **Canonical Context Routing** — you define what the AI should read.
+Prerequisites: Node.js 22+, pnpm 10+, Git.
 
 ---
 
-## Prerequisites
+## 1. Install & first scan
 
-- Node.js 22+
-- pnpm 10+
-- Git
+Build from source (`npm publish` is not yet available) and shim the `evlite` command:
 
----
-
-## Step 1: Setup
-
-### Clone and build
-
-```bash
+```powershell
 git clone https://github.com/izumix77/evidence-vault-lite
 cd evidence-vault-lite
 pnpm install
 pnpm build
 ```
 
-### Make the command available (Windows PowerShell)
-
-Global install is not supported due to `workspace:*` dependencies.
-Add a function to your PowerShell Profile instead.
+**Windows / PowerShell** — add a profile function:
 
 ```powershell
-# Open your profile
 notepad $PROFILE
-```
-
-Add the following line and save:
-
-```powershell
+# Append, replacing the path:
 function evlite { node "C:\path\to\evidence-vault-lite\packages\cli\dist\index.js" @args }
+. $PROFILE
+evlite --version   # → 0.1.0
 ```
 
-Reload the profile:
+**macOS / Linux:**
+
+```bash
+alias evlite='node /path/to/evidence-vault-lite/packages/cli/dist/index.js'
+```
+
+Then index your repo and open the UI:
 
 ```powershell
-. $PROFILE
-evlite --version   # Should print 0.1.0
-```
-
-### Make the command available (macOS / Linux)
-
-```bash
-# Add to ~/.bashrc or ~/.zshrc
-alias evlite="node /path/to/evidence-vault-lite/packages/cli/dist/index.js"
-```
-
----
-
-## Step 2: Introduce to an existing repo
-
-Navigate to your repo and run scan.
-
-```bash
-cd /path/to/your-repo
+cd your-repo
 evlite scan
-```
+# ✔ Scanned 83 files
+# ✔ 2 frontmatter blocks found
+# ✔ registry.json generated → .ev-lite/registry.json
 
-Example output:
-```
-✔ Scanned 83 files
-✔ 2 frontmatter blocks found
-✔ registry.json generated → .ev-lite/registry.json
-```
-
-This generates `.ev-lite/registry.json` — an index of all markdown files in the repo.
-
----
-
-## Step 3: Launch the UI
-
-```bash
-evlite ui --root /path/to/your-repo
-```
-
-Example output:
-```
-✔ EvidenceVault Lite UI
-✔ Serving: http://localhost:3137
-✔ Root: /path/to/your-repo
-```
-
-The browser opens automatically at `http://localhost:3137`.
-
-> If the port is already in use:
-> ```powershell
-> # Windows
-> Get-NetTCPConnection -LocalPort 3137 | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
-> ```
-
----
-
-## Step 4: Insert frontmatter into all files at once
-
-When you open the UI, you'll see a large number of files in the `No Metadata` section.
-Use `evlite init-meta` to insert frontmatter in bulk.
-
-```bash
-# Linux / macOS
-find . -name "*.md" | xargs -I{} evlite init-meta {}
-
-# Windows PowerShell
-Get-ChildItem -Recurse -Filter "*.md" | ForEach-Object {
-    evlite init-meta $_.FullName
-}
-```
-
-Example output:
-```
-✔ frontmatter inserted → docs/README.md
-✔ frontmatter inserted → docs/architecture.md
-WARN: frontmatter already exists in docs/GLOSSARY.md — skipped
-```
-
-The inserted frontmatter looks like this:
-
-```yaml
----
-ev_id: ev:docs.README        ← inferred from filename
-stack: docs                  ← inferred from directory name
-status: draft
-tags: []
-depends_on: []
-related: []
-supersedes: []
----
-```
-
-Then update the registry:
-
-```bash
-evlite scan
-```
-
-Reload the UI — all files will move to the `With Metadata` section.
-
----
-
-## Step 5: Edit frontmatter in the UI
-
-### File list
-
-The left pane shows files **grouped by stack / directory**.
-
-```
-▼ WITH METADATA (83)
-  ▼ dgc (12)
-      ev:dgc.constitution — Constitution.md
-      ev:dgc.types — types.md
-  ▼ traceos (8)
-      ev:traceos.constitution — CONSTITUTION.md
-▼ NO METADATA (0)
-```
-
-Click a group name or section header to collapse / expand.
-
-### Metadata Editor
-
-Click a file to open the Metadata Editor in the right pane.
-
-| Field | Meaning | Example |
-|---|---|---|
-| `ev_id` | Globally unique ID | `ev:dgc.constitution` |
-| `stack` | Owning stack | `dgc` |
-| `status` | Active state | `active` |
-| `tags` | Search / classification tags | `core, spec` |
-| `depends_on` | Required prerequisite documents | `ev:dgc.constitution` |
-| `related` | Related documents (optional) | `ev:dgc.types` |
-| `supersedes` | Replaces an older version | `ev:dgc.constitution-v0-1` |
-
-**Field semantics:**
-
-```
-depends_on = prerequisite — cannot be understood without this
-related    = related — useful reference, not required
-supersedes = replaces an older version of this document
-```
-
-The `depends_on` / `related` / `supersedes` fields show autocomplete suggestions
-from the registry when you type `ev:`.
-
-Click **[ Save Metadata ]** to write the updated frontmatter back to the `.md` file.
-
-### Set important files to active
-
-```yaml
-status: active    ← included in Context Packs (important documents)
-status: draft     ← draft (included only when explicitly referenced)
-status: archived  ← archived (never included)
-```
-
----
-
-## Step 6: Snapshot your code
-
-You can pass **source code itself** to AI — not just documentation.
-
-```bash
-evlite snapshot packages/core/src --stack dgc
-```
-
-Example output:
-```
-✔ Scanned 9 files
-✔ snapshot.md generated → .ev-lite/snapshots/src.md
-✔ ev_id: ev:dgc.snapshot-src
-```
-
-The generated snapshot.md looks like this:
-
-```md
-# Directory: packages/core/src
-
-## Tree
-packages/core/src/
-  index.ts
-  apply.ts
-  types.ts
-  ...
-
----
-
-## index.ts
-\`\`\`ts
-// file contents
-\`\`\`
-
-## apply.ts
-\`\`\`ts
-// file contents
-\`\`\`
-```
-
-**You can also generate snapshots from the UI:**
-Open the Snapshot tab → enter a path → click [ Generate Snapshot ]
-
-> Snapshots are transfer artifacts, not source of truth.
-> `source files are canonical. snapshot is an AI transfer artifact.`
-
-After generating a snapshot, update the registry:
-
-```bash
-evlite scan
-```
-
-### Dependency mode: snapshot by import graph
-
-To snapshot only the files actually reachable from an entrypoint, use `--deps`:
-
-```bash
-evlite snapshot packages/core/src/index.ts --deps --stack dgc
-```
-
-Example output:
-```
-✔ Resolved 12 files (17 edges)
-✔ Skipped 31 imports
-✔ snapshot.md generated → .ev-lite/snapshots/index.md
-✔ ev_id: ev:dgc.snapshot-index
-```
-
-The generated snapshot includes three additional sections:
-
-- **Dependency Scope** — summary table (files, edges, skipped count)
-- **Dependency Tree** — visual tree of the import graph with `(visited)` markers for shared deps
-- **Skipped Imports** — table of imports that were not followed, with reasons (`external`, `alias`, `missing`, etc.)
-
-This mode traces only **static relative imports** (`./` and `../`).
-`node_modules` and workspace aliases (e.g. `@ev-lite/shared`) are listed as skipped — not silently dropped.
-
-> **When to use `--deps` vs directory snapshot:**
-> - Directory snapshot: you want everything in a folder
-> - `--deps`: you want only what your entrypoint actually uses
-
-### Agent context compilation
-
-To generate both a dependency snapshot and a pack in one command:
-
-```bash
-evlite context packages/core/src/index.ts --goal "implement --output option" --stack evlite
-```
-
-Example output:
-```
-✔ snapshot.md generated  → .ev-lite/snapshots/index.md
-✔ ev_id                  → ev:evlite.snapshot-index
-✔ pack.json saved        → .ev-lite/packs/context-index-20260527T103000.json
-✔ pack.md generated      → .ev-lite/packs/context-index-20260527T103000.md
-✔ pack_id                → pack:context-index-20260527T103000
-```
-
-To preview without writing files:
-
-```bash
-evlite context packages/core/src/index.ts --goal "..." --dry-run
-```
-
-To find which snapshots and packs are affected by a file change:
-
-```bash
-evlite validate --affected packages/core/src/snapshot.ts
-```
-
----
-
-## Step 7: Create a Context Pack
-
-### Build the pack in the UI
-
-Open the **Pack Builder tab** in the UI.
-
-| Field | Meaning |
-|---|---|
-| `id` | Pack identifier (`pack:my-pack` — immutable after creation) |
-| `goal` | What you want the AI to do |
-| `mustRead` | List of ev_ids the AI must read |
-| `doNotInfer` | Things the AI must not infer |
-| `outputGoal` | Expected output from the AI |
-
-Example:
-
-```json
-{
-  "id": "pack:glassbox-overview",
-  "goal": "Understand GlassBox architecture and design principles",
-  "mustRead": [
-    "ev:glassbox.readme",
-    "ev:glassbox.readme-ja",
-    "ev:glassbox.todo"
-  ],
-  "doNotInfer": [
-    "Do not assume implementation details not in the docs"
-  ],
-  "outputGoal": [
-    "Explain GlassBox's core concepts",
-    "Identify dependencies on DGC/TraceOS"
-  ]
-}
-```
-
-Click **[ Save Pack ]** to save to `.ev-lite/packs/glassbox-overview.json`.
-
-### Generate pack.md
-
-Click **[ Generate pack.md ]** to see the preview.
-Use the **[ Copy ]** button in the top-right to copy to clipboard.
-
-You can also generate from the CLI:
-
-```bash
-evlite pack glassbox-overview
-# → .ev-lite/packs/glassbox-overview.md
-```
-
----
-
-## Step 8: Pass pack.md to AI
-
-Paste the generated pack.md directly into ChatGPT / Claude Project.
-
-```
-# Context Pack — Understand GlassBox architecture and design principles
-
-> Generated by EvidenceVault Lite 0.1.0
-> Pack ID: pack:glassbox-overview
-
-## Scope
-Understand GlassBox architecture and design principles
-
-## Output Goal
-- Explain GlassBox's core concepts
-
-## Do Not Infer
-- Do not assume implementation details not in the docs
-
----
-
-## Context
-
-### GlassBox README
-... (file contents)
-```
-
-The AI reads `goal` / `outputGoal` / `doNotInfer` as instructions
-and uses the `mustRead` content as structured context.
-
----
-
-## CLI Reference
-
-| Command | Description |
-|---|---|
-| `evlite scan` | Scan repo → generate `registry.json` |
-| `evlite snapshot <path>` | Snapshot code → generate `snapshot.md` |
-| `evlite pack <pack-id>` | Generate `pack.md` from `pack.json` |
-| `evlite init-meta <file>` | Insert frontmatter block |
-| `evlite validate` | Check dependency and reference integrity |
-| `evlite context <entrypoint>` | Compile agent context: deps snapshot + pack in one command |
-| `evlite report <name>` | Generate an EVReport scaffold |
-| `evlite ui` | Launch local UI → `localhost:3137` |
-
-### snapshot options
-
-| Option | Description |
-|---|---|
-| `--stack <stack>` | Stack value for frontmatter |
-| `--output <path>` | Output file path |
-| `--include <glob>` | File patterns to include (repeatable) |
-| `--exclude <glob>` | File patterns to exclude (repeatable) |
-| `--no-content` | Tree only, no file contents |
-| `--deps` | Trace import/export dependencies from entrypoint |
-| `--max-depth <n>` | Max traversal depth (default: `10`) |
-| `--include-tests` | Include `.spec.ts` / `.test.ts` files |
-| `--no-dep-tree` | Omit dependency tree section from output |
-| `--dry-run` | Resolve dependency graph without writing snapshot.md |
-| `--json` | Print DepGraph as JSON to stdout (machine-readable contract) |
-
-### validate options
-
-| Option | Description |
-|---|---|
-| `--strict` | Exit 1 if any ERROR is found |
-| `--show-chains` | Print supersedes chains |
-| `--show-impact <ev_id>` | Show all docs and packs referencing the given ev_id |
-| `--show-orphans` | List nodes not referenced by any doc or pack |
-| `--show-depends` | Show depends_on / related / supersedes structure |
-| `--show-cycles` | Detect circular dependencies |
-| `--active-only` | With `--show-depends`: skip superseded related nodes |
-| `--focus <ev_id>` | Show all info for the specified ev_id |
-| `--focus-dir <path>` | Show all info for nodes in the specified directory |
-| `--output <path>` | Save validate output to a file |
-| `--affected <file>` | Find snapshots and packs affected by a source file change |
-| `--json` | Output `--affected` result as JSON (use with `--affected`) |
-
-### report options
-
-| Option | Description |
-|---|---|
-| `--kind <kind>` | Report kind: `implementation` / `analysis` / `architecture` / `research` / `incident` / `observer` / `retrospective` (default: `implementation`) |
-| `--stack <stack>` | Stack value for frontmatter (default: `docs`) |
-| `--output <path>` | Output file path (default: `artifacts/reports/<name>.report.md`) |
-
-### ui options
-
-| Option | Description |
-|---|---|
-| `--root <path>` | Root directory to serve |
-| `--port <port>` | Port number (default: `3137`) |
-
-> You can also set a default port per repo via `.ev-lite/settings.json`:
-> ```json
-> { "port": 3138, "description": "my-repo — reference UI" }
-> ```
-
----
-
-## Common Patterns
-
-### Cross-repo consultation
-
-Create a dedicated docs repo and collect documents from multiple repos:
-
-```
-dgc-ecosystem-docs/
-  dgc_docs/
-  traceos_docs/
-  burnscope_docs/
-  ...
-```
-
-```bash
-cd dgc-ecosystem-docs
-evlite scan
 evlite ui
+# ✔ Serving: http://localhost:3137
 ```
 
-### Validate dependency integrity
+`evlite scan` writes `.ev-lite/registry.json` — every `EvidenceNode` carries the parsed frontmatter plus computed `importance` (`reference_count`, `pack_dependency_count`) and `derived_tags` (`NEW` / `OLD` / `CORE` / `COLD` / `SUPERSEDED` …). The UI re-reads this file; nothing is ever written back to your source markdown.
+
+---
+
+## 2. Add frontmatter
+
+EVLite reads metadata from each `.md` file's YAML frontmatter:
+
+```yaml
+---
+ev_id: ev:stack.document-name   # globally unique id ("ev:" + dotted path)
+stack: docs                     # owning stack (often the parent dir)
+status: active                  # active | draft | experimental | deprecated | archived | superseded | stale
+tags: [core, spec]
+depends_on: [ev:other.prereq]   # cannot be understood without this
+related:    [ev:other.context]  # related but not required
+supersedes: [ev:old.version]    # this doc replaces an older one
+---
+```
+
+To insert a draft block into a file that has none:
+
+```powershell
+evlite init-meta docs/architecture.md
+```
+
+To bulk-insert across the repo:
+
+```powershell
+# PowerShell
+Get-ChildItem -Recurse -Filter "*.md" | ForEach-Object {
+  evlite init-meta $_.FullName
+}
+```
 
 ```bash
-evlite validate
+# bash / zsh
+find . -name "*.md" | xargs -I{} evlite init-meta {}
 ```
 
-```
-WARN: ev:burnscope.mvp depends_on missing → ev:traceid.phase1
-ERROR: duplicate ev_id → ev:traceid.phase1 (2 files)
-```
+After editing or inserting frontmatter, run `evlite scan` (or click **Scan ▶** in the UI) to refresh the registry.
 
-### Recommended .gitignore
+---
 
-```
-# generated artifacts — exclude
-.ev-lite/registry.json
-.ev-lite/snapshots/
-.ev-lite/packs/*.md
+## 3. Browse your repository — `Dirs` tab
 
-# pack definitions — personal use only, do not commit to public repos
+Open the **Dirs** tab in the UI for a tree view of the repo. Each row shows the directory name and the count of `.md` files directly inside it; `▶` expands lazily (one server call per directory).
+
+Selecting a directory loads its files into the right pane with:
+
+- the file's `ev_id` and relative path,
+- the explicit `status` badge (`active` / `draft` / …),
+- every **DerivedTag** the scan attached.
+
+DerivedTags tell you the health of an artifact at a glance:
+
+| Tag | Meaning |
+|---|---|
+| `NEW` / `RECENT` / `OLD` | Freshness derived from `updated_at` (≤30d / ≤90d / ≥365d) |
+| `STALE` | Explicit `status: stale` |
+| `SUPERSEDED` | Either `status: superseded` or another node lists this one in `supersedes:` |
+| `ACTIVE` / `ARCHIVED` / `EXPERIMENTAL` | Lifecycle from `status` |
+| `CORE` | `reference_count ≥ 10` — many other artifacts point here |
+| `HOT` | `pack_dependency_count ≥ 3` — included in many packs |
+| `FOUNDATIONAL` | `CORE` + `OLD` — long-lived bedrock document |
+| `COLD` | Zero references, zero pack dependencies |
+
+Two click targets from a directory row:
+
+- **File click** → jumps to **Metadata Editor** with that file pre-selected.
+- **→ Snapshot** → jumps to **Snapshot** tab with `path` pre-filled.
+
+---
+
+## 4. Create a Context Pack — `Pack Builder` tab
+
+A **Context Pack** is the structured prompt you hand to an AI: which docs to read, which inferences are off-limits, what the deliverable looks like. Packs are stored as `.ev-lite/packs/<name>.json` and rendered to `pack.md` on demand.
+
+1. **Pack Builder → New**, then fill the form:
+   - `id` — `pack:<name>` (immutable after first save)
+   - `goal` — what the AI should accomplish
+   - `mustRead[]` — required reading (`ev_id`s)
+   - `doNotInfer[]` — assumptions the AI must not invent
+   - `outputGoal[]` — what shape of output you want
+2. Populate `mustRead` without typing every id:
+   - **[ + Add from registry ]** — searchable list of all `ev_id` nodes; multi-select; duplicates auto-skipped.
+   - **[ + From report/handover ]** — surfaces every `EVReport` and `HandoverReport`. Expand a row to see the candidate ev_ids it nominates (a report's `required_packs_for_continuation`, a handover's `must_read`); check the ones you want and add them in one go.
+3. **Related** section (new in Phase 4) lets you attach `ev_id` or `pack:`-prefixed cross-links without polluting `mustRead`. Use the same picker.
+4. **Save Pack** → **Generate pack.md** to render the markdown bundle. Click **Copy** and paste into Claude / ChatGPT.
+
+**Importing an AI-generated pack:** click **[ Import JSON ]**, paste a `ContextPack` JSON, and EVLite validates it against `ContextPackSchema` (zod) before saving. Mistakes surface as per-field errors inside the modal.
+
+CLI equivalent:
+
+```powershell
+evlite pack my-pack            # → .ev-lite/packs/my-pack.md
 ```
 
 ---
 
-## Philosophy
+## 5. Generate a code snapshot
 
+Snapshots are **AI transfer artifacts** — never source of truth. They bundle a directory or import graph into a single `snapshot.md` you can paste into an AI tool.
+
+**Directory snapshot** (everything under a path):
+
+```powershell
+evlite snapshot packages/core/src --stack core
 ```
-EvidenceVault Lite does not search for relevance.
-EvidenceVault Lite routes context by human-defined structure.
 
-Not Graph-RAG. Canonical Context Routing.
+**Dependency snapshot** (`--deps` traces static imports from an entrypoint):
 
-Truth about what to read emerges outside the system.
+```powershell
+evlite snapshot packages/core/src/index.ts --deps --max-depth 10
+# Reports any skipped imports — alias / external / dynamic / missing
 ```
+
+**One-shot context** — dep snapshot + Context Pack for an entrypoint:
+
+```powershell
+evlite context packages/core/src/index.ts --goal "review for cycle bugs"
+# → snapshot.md  +  pack.json registering it as mustRead
+```
+
+The **Snapshot** tab in the UI exposes all of these knobs plus a **Favorites** list of paths you use often. Generating from the UI also re-runs `scan` automatically.
+
+After generating, the snapshot is itself an `EvidenceNode` in the registry — you can reference it from packs as `ev:<stack>.snapshot-<name>`.
 
 ---
 
-_EvidenceVault Lite Getting Started Guide_
-_Apache 2.0_
+## 6. Track implementation memory with `Reports`
+
+When you finish a meaningful slice of work, scaffold an EVReport so the rationale survives the next AI session:
+
+```powershell
+evlite report cycle-detection --kind implementation --stack core
+# → artifacts/reports/cycle-detection.report.md
+```
+
+The generated frontmatter includes structured fields you fill in by hand:
+
+- `goal`, `modified_areas`, `semantic_impact`, `architectural_consequences`
+- `remaining_risks`, `known_assumptions`, `unresolved_contradictions`
+- `required_packs_for_continuation` — **the bridge to the next pack**
+- `suggested_next_actions`, `related_reports`
+
+Browse and review reports in the **Reports** tab. Critically, `required_packs_for_continuation` is exactly what the Pack Builder's **[ + From report/handover ]** picker surfaces — close the loop without copy-pasting ids.
+
+---
+
+## 7. Hand off between sessions — `Handovers` tab
+
+A **HandoverReport** is shorter than a Report and aimed at the *next* session, not the previous one. Scaffold with:
+
+```powershell
+evlite handover my-session
+# → artifacts/handovers/my-session.handover.md
+```
+
+Or use the **Handovers** tab's "New Handover" panel — same scaffold, no CLI needed.
+
+Fill in:
+
+- `goal` — what the next session is for
+- `current_state` — where you left off
+- `next_actions[]` — concrete steps
+- `must_read[]` — `ev_id`s required reading before starting
+- `optional_read[]`, `active_decisions[]`, `unresolved_questions[]`, `known_risks[]`
+
+`evlite scan` registers handovers as `EvidenceNode`s and folds `must_read` into the dependency graph automatically. To resume, open Pack Builder, choose **[ + From report/handover ]**, expand your handover, and add its `must_read` ids to the next pack with one click.
+
+---
+
+## 8. Validate your repository
+
+`evlite validate` walks the registry and packs to flag broken references and surface health metrics. Mix any flags freely.
+
+**Baseline checks** (always on):
+
+- duplicate `ev_id`
+- missing `depends_on` / `supersedes` targets
+- `active` doc depending on `deprecated` / `archived`
+- pack `mustRead` containing a superseded node
+
+**Importance signals** — who matters?
+
+```powershell
+evlite validate --show-importance
+```
+
+```
+─── IMPORTANCE REPORT ──────────────────────────────
+
+TOP REFERENCED
+  ev:dgc.constitution     refs: 24  packs: 8   CORE FOUNDATIONAL
+  ev:traceos.spec         refs: 17  packs: 5   CORE
+
+MOST PACK-DEPENDENT
+  ev:dgc.constitution     packs: 8
+
+COLD (unreferenced)
+  ev:docs.old-design
+```
+
+**Risk signals** — what's rotting?
+
+```powershell
+evlite validate --show-risk
+```
+
+```
+─── RISK SIGNALS ───────────────────────────────────
+
+ORPHAN (not referenced by any pack or node)
+  ev:internal.scratch-notes
+
+STALE (explicitly marked stale)
+  ev:traceid.phase1
+
+STALE DEPENDENCY
+  pack:impl-phase1 → ev:traceid.phase1 (STALE)
+```
+
+**Targeted exploration:**
+
+```powershell
+evlite validate --show-impact ev:dgc.constitution   # who references this id?
+evlite validate --focus ev:dgc.constitution         # full one-page summary
+evlite validate --focus-dir packages/core           # same, scoped to a directory
+evlite validate --affected packages/core/src/scan.ts --json
+                                                    # reverse lookup: which snapshots / packs
+                                                    # are stale because this file changed?
+```
+
+**Save the output:**
+
+```powershell
+evlite validate --show-importance --show-risk --output reports/validate.md
+```
+
+`--strict` makes errors fatal (`exit 1`) — drop it into CI.
+
+---
+
+## 9. A typical AI-native loop
+
+Put it all together:
+
+```
+1. evlite scan
+2. UI → Dirs tab        ─ survey health: which areas are CORE? COLD?
+3. UI → Pack Builder    ─ New pack, [ + From report/handover ] pulls in the
+                         last session's must_read, [ + Add from registry ]
+                         tops up with surrounding context, Generate pack.md
+4. Paste pack.md into Claude / ChatGPT and execute the work
+5. evlite report <name> ─ record what changed, fill required_packs_for_continuation
+6. evlite handover <name> ─ jot must_read / next_actions for tomorrow
+7. evlite validate --show-risk --strict   (CI gate)
+   → STALE DEPENDENCY catches packs still pointing at superseded docs
+8. Next session: jump to step 3 — the report and handover are already
+   in the picker, no copy-paste needed.
+```
+
+That's the routing system. The structure is yours; EVLite just keeps it consistent.
+
+---
+
+## More
+
+- Constitution v0.5 (philosophy + the full `DerivedTag` / `ImportanceScore` / `RiskSignal` rules): [Constitution_v0_5.md](Constitution_v0_5.md)
+- Japanese version of this guide: [GETTING_STARTED.ja.md](GETTING_STARTED.ja.md)
+- README at the repo root: [../README.md](../README.md)
