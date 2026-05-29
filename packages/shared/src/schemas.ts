@@ -12,19 +12,45 @@ export const EvidenceStatusSchema = z.enum([
   "stale",
 ]);
 
+export const DerivedTagSchema = z.enum([
+  // Freshness
+  "NEW",
+  "RECENT",
+  "OLD",
+  "STALE",
+  // Lifecycle
+  "ACTIVE",
+  "SUPERSEDED",
+  "ARCHIVED",
+  "EXPERIMENTAL",
+  // Usage (populated by P9-b)
+  "HOT",
+  "CORE",
+  "COLD",
+  "FOUNDATIONAL",
+]);
+
+export const ImportanceSchema = z.object({
+  reference_count: z.number().optional(),
+});
+
 export const EvidenceNodeSchema = z.object({
-  ev_id:      z.string().nullable(),
-  kind:       EvidenceNodeKindSchema,
-  path:       z.string(),
-  anchor:     z.string().optional(),
-  stack:      z.string().optional(),
-  status:     EvidenceStatusSchema.optional(),
-  tags:       z.array(z.string()),
-  depends_on: z.array(z.string()),
-  related:    z.array(z.string()),
-  supersedes: z.array(z.string()),
-  title:      z.string().optional(),
-  excerpt:    z.string().optional(),
+  ev_id:        z.string().nullable(),
+  kind:         EvidenceNodeKindSchema,
+  path:         z.string(),
+  anchor:       z.string().optional(),
+  stack:        z.string().optional(),
+  status:       EvidenceStatusSchema.optional(),
+  tags:         z.array(z.string()),
+  depends_on:   z.array(z.string()),
+  related:      z.array(z.string()),
+  supersedes:   z.array(z.string()),
+  title:        z.string().optional(),
+  excerpt:      z.string().optional(),
+  created_at:   z.string().optional(),
+  updated_at:   z.string().optional(),
+  importance:   ImportanceSchema.optional(),
+  derived_tags: z.array(DerivedTagSchema).optional(),
 });
 
 export const EVReportKindSchema = z.enum([

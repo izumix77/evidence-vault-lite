@@ -428,6 +428,111 @@ button.primary:hover {
   font-size: 12px;
 }
 
+/* ---------- Derived tag badges ---------- */
+.derived-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 16px;
+  padding: 8px 10px;
+  background: #0e1117;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+}
+
+.derived-tags-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b949e;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  margin-right: 4px;
+}
+
+.derived-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  border-radius: 3px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.04em;
+  background: #21262d;
+  color: #8b949e;
+  border: 1px solid #30363d;
+}
+
+/* Freshness */
+.derived-tag-NEW {
+  color: #3fb950;
+  border-color: #2a4a30;
+  background: #0f1f15;
+}
+
+.derived-tag-RECENT {
+  color: #39c5cf;
+  border-color: #1b4147;
+  background: #0d1f21;
+}
+
+.derived-tag-OLD {
+  color: #d29922;
+  border-color: #4d3b0e;
+  background: #1f1810;
+}
+
+.derived-tag-STALE {
+  color: #f85149;
+  border-color: #5d2329;
+  background: #2d1418;
+}
+
+/* Lifecycle */
+.derived-tag-ACTIVE {
+  color: #58a6ff;
+  border-color: #1f4068;
+  background: #0d1a2d;
+}
+
+.derived-tag-SUPERSEDED,
+.derived-tag-ARCHIVED {
+  color: #6e7681;
+  border-color: #30363d;
+  background: #161b22;
+}
+
+.derived-tag-EXPERIMENTAL {
+  color: #bc8cff;
+  border-color: #3a2a55;
+  background: #1a112b;
+}
+
+/* Usage */
+.derived-tag-HOT {
+  color: #f85149;
+  border-color: #5d2329;
+  background: #2d1418;
+}
+
+.derived-tag-CORE {
+  color: #f0d068;
+  border-color: #5a4a13;
+  background: #1f1a0a;
+}
+
+.derived-tag-COLD {
+  color: #6e7681;
+  border-color: #30363d;
+  background: #161b22;
+}
+
+.derived-tag-FOUNDATIONAL {
+  color: #f5d27a;
+  border-color: #5a4a13;
+  background: #211a08;
+  box-shadow: inset 0 0 0 1px rgba(245, 210, 122, 0.15);
+}
+
 /* ---------- Metadata Editor ---------- */
 .metadata-editor h2 {
   font-size: 14px;

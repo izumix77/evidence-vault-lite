@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import {
   EVIDENCE_STATUSES,
+  type DerivedTag,
   type EvidenceStatus,
   type MarkdownFilePayload,
   type Registry,
 } from "../types";
 import { EvIdListEditor } from "./EvIdListEditor";
+import { DerivedTagBadges } from "./DerivedTagBadges";
 
 type FormState = {
   ev_id: string;
@@ -205,10 +207,13 @@ export function MetadataEditor({ path, registry, onScan }: Props) {
   }
 
   const hasFrontmatter = Object.keys(payload.frontmatter).length > 0;
+  const derivedTags: DerivedTag[] =
+    registry.nodes.find((n) => n.path === path)?.derived_tags ?? [];
 
   return (
     <div className="metadata-editor">
       <h2>{path}</h2>
+      <DerivedTagBadges tags={derivedTags} />
 
       {!hasFrontmatter && (
         <div className="add-metadata-banner">

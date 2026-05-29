@@ -11,4 +11,5 @@ export * from "./context.js";
 export * from "./affected.js";
 export * from "./favorites.js";
 export * from "./settings.js";
+export * from "./deriveTags.js";
 export * from "@ev-lite/shared";

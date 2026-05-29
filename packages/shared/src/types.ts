@@ -7,6 +7,8 @@ import type {
   EVReportKindSchema,
   EVReportSchema,
   HandoverReportSchema,
+  DerivedTagSchema,
+  ImportanceSchema,
 } from "./schemas.js";
 
 export type EvidenceNodeKind = z.infer<typeof EvidenceNodeKindSchema>;
@@ -16,3 +18,5 @@ export type ContextPack      = z.infer<typeof ContextPackSchema>;
 export type EVReportKind     = z.infer<typeof EVReportKindSchema>;
 export type EVReport         = z.infer<typeof EVReportSchema>;
 export type HandoverReport   = z.infer<typeof HandoverReportSchema>;
+export type DerivedTag       = z.infer<typeof DerivedTagSchema>;
+export type Importance       = z.infer<typeof ImportanceSchema>;

@@ -1,7 +1,11 @@
 import path from "node:path";
 import fs from "fs-extra";
 import matter from "gray-matter";
-import { EvidenceStatusSchema, type EvidenceNode } from "@ev-lite/shared";
+import {
+  EvidenceStatusSchema,
+  type EvidenceNode,
+  type Importance,
+} from "@ev-lite/shared";
 
 const EXCERPT_LENGTH = 200;
 
@@ -16,6 +20,29 @@ function extractFirstH1(content: string): string | undefined {
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((v): v is string => typeof v === "string");
+}
+
+function asOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+// js-yaml auto-parses ISO 8601 timestamps into Date objects, so accept both.
+function asDateString(value: unknown): string | undefined {
+  if (typeof value === "string" && value.length > 0) return value;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString();
+  }
+  return undefined;
+}
+
+function parseImportance(value: unknown): Importance | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const obj = value as Record<string, unknown>;
+  const refCount = obj.reference_count;
+  if (typeof refCount === "number") {
+    return { reference_count: refCount };
+  }
+  return undefined;
 }
 
 function toPosix(p: string): string {
@@ -65,6 +92,9 @@ export async function parseFile(
     supersedes: asStringArray(data.supersedes),
     title,
     excerpt,
+    created_at: asDateString(data.created_at),
+    updated_at: asDateString(data.updated_at),
+    importance: parseImportance(data.importance),
   };
 }
 

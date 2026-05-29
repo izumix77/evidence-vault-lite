@@ -15,6 +15,24 @@ export const EVIDENCE_STATUSES: EvidenceStatus[] = [
   "archived",
 ];
 
+export type DerivedTag =
+  | "NEW"
+  | "RECENT"
+  | "OLD"
+  | "STALE"
+  | "ACTIVE"
+  | "SUPERSEDED"
+  | "ARCHIVED"
+  | "EXPERIMENTAL"
+  | "HOT"
+  | "CORE"
+  | "COLD"
+  | "FOUNDATIONAL";
+
+export type Importance = {
+  reference_count?: number;
+};
+
 export type EvidenceNode = {
   ev_id: string | null;
   kind: EvidenceNodeKind;
@@ -28,6 +46,10 @@ export type EvidenceNode = {
   supersedes: string[];
   title?: string;
   excerpt?: string;
+  created_at?: string;
+  updated_at?: string;
+  importance?: Importance;
+  derived_tags?: DerivedTag[];
 };
 
 export type ContextPack = {
