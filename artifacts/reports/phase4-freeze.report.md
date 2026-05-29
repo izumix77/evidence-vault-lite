@@ -105,7 +105,4 @@ Constitution v0.5 の範囲を超えて実装が先行した箇所：
 
 ## Next Steps
 
-1. CHANGELOG v0.1.x 更新
-2. v0.1.x freeze candidate 決定
-3. Constitution v0.5 差分監査
-4. AgentRelay MVP 設計開始
+- AgentRelay MVP 設計開始
